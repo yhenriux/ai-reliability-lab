@@ -21,7 +21,7 @@ with st.sidebar:
     provider = st.selectbox("Provedor", ["demo", "ollama"] if local_ollama_enabled else ["demo"])
     model = (
         "deterministic-baseline-v1" if provider == "demo"
-        else st.text_input("Modelo Ollama", "smollm2:135m")
+        else st.text_input("Modelo Ollama", "qwen3:4b")
     )
     url = os.environ.get("AI_LAB_OLLAMA_URL", "http://127.0.0.1:11434")
     price_in = price_out = 0.0
