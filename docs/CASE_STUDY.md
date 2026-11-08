@@ -74,9 +74,11 @@ O avaliador registra a resposta integral, critérios e metadados. A [metodologia
 |---|---|---|
 | Baseline determinístico | 100 casos, gabarito conhecido | CI e quality gates |
 | SmolLM2 135M real | 8 casos, **0/8 aprovações heurísticas** | [JSON observado](../data/real_smoke_smollm2_135m.json) |
-| Qwen3 4B real | 100 casos, execução integral em CPU | [Workflow e status](https://github.com/yhenriux/ai-reliability-lab/actions/workflows/full-model-benchmark.yml) |
+| Qwen3 4B real | 100 casos únicos, 0% de aprovação heurística; latência média 9,98 s e p95 10,86 s | [Execução e artefato](https://github.com/yhenriux/ai-reliability-lab/actions/runs/42430639080) |
 
 No primeiro experimento real, o modelo de 135M parâmetros apresentou repetição de prompt e respostas irrelevantes. O resultado motivou a seleção do Qwen3 4B, modelo multilíngue de aproximadamente 2,5 GB quantizado, compatível com o runner CPU. A [análise da escolha](MODEL_SELECTION.md) documenta alternativas, critérios e restrições.
+
+O benchmark real terminou com status de workflow `success`, mas apresentou 100 reprovações heurísticas. As primeiras respostas inspecionadas expõem raciocínio em inglês e problemas de citação e aderência lexical. A interpretação requer análise das respostas finais e revisão humana independente; o artefato JSON integral está no workflow, ainda pendente de commit em `data/real_full_qwen3_4b_v2.json`.
 
 **O modo demo usa o gabarito** e sua aprovação não mede capacidade do modelo. Os resultados reais são reportados somente após conferência dos artefatos. Consulte [RESULTS.md](RESULTS.md) para valores verificados.
 
