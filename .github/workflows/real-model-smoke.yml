@@ -1,0 +1,40 @@
+name: Real local LLM smoke benchmark
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/real-model-smoke.yml
+
+jobs:
+  real-inference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Start CPU-only Ollama container
+        run: |
+          docker run -d --name aurora-ollama -p 127.0.0.1:11434:11434 ollama/ollama:latest
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:11434/api/tags >/dev/null; then break; fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:11434/api/tags
+      - name: Download small public model
+        run: docker exec aurora-ollama ollama pull smollm2:135m
+      - name: Run 8 real-model cases across 4 categories
+        run: |
+          python -m scripts.run_evaluation --provider ollama --model smollm2:135m \
+            --balanced-per-category 2 --output artifacts/real-smoke.json \
+            --db artifacts/real-smoke.db
+      - name: Preserve real-model report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-llm-smoke-report
+          path: artifacts/real-smoke.json
+          retention-days: 14
+          if-no-files-found: warn
