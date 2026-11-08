@@ -18,6 +18,7 @@ def main():
     parser.add_argument("--output", type=Path, default=Path("artifacts/evaluation.json"))
     parser.add_argument("--db", type=Path, default=Path("artifacts/cli-runs.db"))
     parser.add_argument("--strict", action="store_true")
+    parser.add_argument("--print-json", action="store_true", help="Print full synthetic report in CI logs")
     args = parser.parse_args()
 
     _, dataset = load_data(args.dataset_version)
@@ -43,6 +44,10 @@ def main():
     print(json.dumps({"mode": run["mode"], "model": run["model"],
                       "dataset": run["dataset_version"], "metrics": run["metrics"],
                       "gates": gates, "artifact": str(args.output)}, ensure_ascii=False, indent=2))
+    if args.print_json:
+        print("BEGIN_AURORA_REPORT_JSON")
+        print(json.dumps(run, ensure_ascii=False))
+        print("END_AURORA_REPORT_JSON")
     if args.strict and gates is not None and not gates["passed"]:
         raise SystemExit(1)
 
