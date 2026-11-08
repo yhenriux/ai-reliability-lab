@@ -1,5 +1,6 @@
 """Streamlit interface for the AI Reliability Lab."""
 import json
+import os
 import pandas as pd
 import streamlit as st
 from engine import load_data,ask,evaluate,execute_suite,list_runs,compare_runs
@@ -10,9 +11,11 @@ st.title('AI Reliability Lab')
 st.caption('Banking FAQ Reliability Engineering | Aurora Bank é um banco inteiramente fictício')
 with st.sidebar:
     st.header('Configuração')
-    provider=st.selectbox('Provider',['demo','ollama'])
+    local_ollama_enabled=os.environ.get('AI_LAB_ENABLE_OLLAMA')=='1'
+    provider=st.selectbox('Provider',['demo','ollama'] if local_ollama_enabled else ['demo'])
     model='deterministic-baseline-v1' if provider=='demo' else st.text_input('Modelo local Ollama','llama3.2:1b')
-    url='http://localhost:11434' if provider=='demo' else st.text_input('Ollama URL','http://localhost:11434')
+    # The Ollama endpoint is configured by the operator, never by an anonymous visitor.
+    url=os.environ.get('AI_LAB_OLLAMA_URL','http://127.0.0.1:11434')
     price_in=price_out=0.0
     if provider=='ollama':
         price_in=st.number_input('USD/1M tokens input',value=0.0,min_value=0.0)
@@ -20,6 +23,8 @@ with st.sidebar:
     st.info('Demo = respostas determinísticas com acesso ao gabarito. Nenhum modelo de IA executado. Ollama = modelo local real.')
     if provider=='ollama':
         st.warning('Ollama precisa estar acessível a partir do servidor Streamlit. Em hospedagem pública, localhost não aponta para seu computador.')
+    else:
+        st.caption('Para avaliar um LLM local, execute o projeto no seu computador com AI_LAB_ENABLE_OLLAMA=1.')
     page=st.radio('Navegação',['Dashboard','Banking FAQ Playground','Evaluation Studio','Regression Testing','Safety Lab','Reports & History'])
 
 def metrics_panel(m):
@@ -61,6 +66,9 @@ elif page=='Banking FAQ Playground':
     selection=st.selectbox('Caso de referência',['Pergunta livre']+list(options))
     case=options.get(selection)
     question=st.text_input('Pergunta',value=case['question'] if case else 'Como faço para bloquear cartão?')
+    if case is not None and question != case['question']:
+        st.info('A pergunta foi alterada. Ela será avaliada como pergunta livre, sem utilizar o gabarito do caso selecionado.')
+        case=None
     if st.button('Gerar resposta',type='primary'):
         try:
             answer,citations,elapsed,in_tok,out_tok=ask(question,policies['policies'],provider,model,url,case)
@@ -101,7 +109,11 @@ elif page=='Safety Lab':
     st.caption(f'{len(cases)} casos: prompt injection e falta de evidência.')
     selected=st.selectbox('Exemplo',cases,format_func=lambda c:f"{c['id']}: {c['question']}")
     st.write('Resposta esperada:',selected['expected_answer'])
-    if st.button('Run Safety Suite',type='primary'):
+    left,right=st.columns(2)
+    if left.button('Run Selected Safety Case'):
+        run=execute([selected])
+        if run:st.session_state['safety']=run
+    if right.button('Run Safety Suite',type='primary'):
         run=execute(cases)
         if run:st.session_state['safety']=run
     if st.session_state.get('safety'):
