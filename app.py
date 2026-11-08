@@ -230,16 +230,19 @@ elif page == "Safety Lab":
 
 elif page == "Reports & History":
     st.subheader("Histórico, exportação e importação")
-    uploaded = st.file_uploader("Importar relatório JSON exportado", type=["json"])
-    if uploaded is not None and st.button("Importar relatório"):
-        try:
-            if uploaded.size > 3_000_000:
-                raise ValueError("Arquivo excede 3 MB")
-            imported = validate_run(json.loads(uploaded.getvalue().decode("utf-8")))
-            save_run(imported)
-            st.success("Relatório importado. Recarregue a página para vê-lo no histórico.")
-        except (ValueError, UnicodeError, json.JSONDecodeError) as exc:
-            st.error(f"Arquivo inválido: {exc}")
+    if os.environ.get("AI_LAB_ENABLE_IMPORT") == "1":
+        uploaded = st.file_uploader("Importar relatório JSON exportado", type=["json"])
+        if uploaded is not None and st.button("Importar relatório"):
+            try:
+                if uploaded.size > 3_000_000:
+                    raise ValueError("Arquivo excede 3 MB")
+                imported = validate_run(json.loads(uploaded.getvalue().decode("utf-8")))
+                save_run(imported)
+                st.success("Relatório importado. Recarregue a página para vê-lo no histórico.")
+            except (ValueError, UnicodeError, json.JSONDecodeError) as exc:
+                st.error(f"Arquivo inválido: {exc}")
+    else:
+        st.caption("Importação desabilitada na hospedagem pública. Para habilitar localmente: AI_LAB_ENABLE_IMPORT=1.")
     if not runs:
         st.info("Nenhuma execução registrada.")
     else:
