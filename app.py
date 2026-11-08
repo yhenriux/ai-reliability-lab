@@ -43,7 +43,15 @@ with st.sidebar:
     )
 
 policies, dataset = load_data(dataset_version)
-runs = list_runs()
+# Versioned, independently observed model runs are available even if free hosting resets SQLite.
+bundled_runs = [
+    validate_run(json.loads(path.read_text(encoding="utf-8")))
+    for path in sorted((ROOT / "data").glob("real_smoke_*.json"))
+]
+runs = sorted(
+    {r["id"]: r for r in list_runs() + bundled_runs}.values(),
+    key=lambda r: r["created_at"], reverse=True,
+)
 
 
 def percentage(value):
@@ -115,6 +123,10 @@ if page == "Dashboard":
         st.caption(f'Última execução: {run_label(run)} | Modelo: {run.get("model", "?")}')
         if run.get("mode") == "deterministic_demo":
             st.warning("Indicadores do modo demo são verificações do pipeline, não resultados de LLM.")
+        elif run["metrics"]["n"] < 100:
+            st.info("Execução real em amostra pequena. Os resultados não representam a taxa de aprovação dos 100 casos.")
+        if run.get("workflow_url"):
+            st.markdown(f'[Ver execução verificável no GitHub Actions]({run["workflow_url"]})')
         metrics_panel(run["metrics"])
         history = pd.DataFrame([
             {"data": r["created_at"], "aprovação": r["metrics"]["pass_rate"]}

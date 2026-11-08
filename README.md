@@ -71,7 +71,7 @@ python -m scripts.run_evaluation --provider ollama --model smollm2:135m \
 python -m pytest -q
 ```
 
-CI runs syntax checks, unit tests, six Streamlit module smoke checks, UI evaluation actions, and deterministic regression gates. Both CI and on-demand real-model workflows upload JSON artifacts. Quality gates configured for the deterministic oracle **must not be reused as proof of real model quality**.
+CI runs syntax checks, unit tests, six Streamlit module smoke checks, UI evaluation actions, and deterministic regression gates. Both CI and on-demand real-model workflows upload JSON artifacts. The first verified CPU run is also versioned at [data/real_smoke_smollm2_135m.json](data/real_smoke_smollm2_135m.json) and is visible in the public Dashboard/History (8 cases, 0/8 heuristic passes, p95 2030.392 ms). This intentionally small model repeatedly echoed the prompt; the sample is not a representative performance estimate. Quality gates configured for the deterministic oracle **must not be reused as proof of real model quality**.
 
 ## Interface
 
