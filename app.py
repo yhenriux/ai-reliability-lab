@@ -119,8 +119,9 @@ if page == "Dashboard":
     )
     current = [r for r in runs if r.get("dataset_version") == dataset_version]
     if current:
-        run = current[0]
-        st.caption(f'Última execução: {run_label(run)} | Modelo: {run.get("model", "?")}')
+        preferred = next((i for i, r in enumerate(current) if r.get("mode") == "real_local_llm"), 0)
+        run = st.selectbox("Execução em destaque", current, index=preferred, format_func=run_label)
+        st.caption(f'Modelo: {run.get("model", "?")} | Amostra: {run["metrics"]["n"]} casos')
         if run.get("mode") == "deterministic_demo":
             st.warning("Indicadores do modo demo são verificações do pipeline, não resultados de LLM.")
         elif run["metrics"]["n"] < 100:
@@ -206,7 +207,16 @@ elif page == "Regression Testing":
         candidate = st.selectbox("Candidata", list(labels), index=0)
         if st.button("Comparar execuções", type="primary"):
             try:
+                if labels[baseline]["id"] == labels[candidate]["id"]:
+                    st.warning("Selecione duas execuções distintas para uma comparação útil.")
                 comparison = compare_runs(labels[baseline], labels[candidate])
+                if comparison["baseline_only"] or comparison["candidate_only"]:
+                    st.warning(
+                        "As execuções têm coberturas diferentes. Os deltas usam apenas "
+                        f'{comparison["common_cases"]} casos em comum; '
+                        f'{comparison["baseline_only"]} exclusivos da baseline e '
+                        f'{comparison["candidate_only"]} exclusivos da candidata.'
+                    )
                 st.metric("Novas regressões", len(comparison["regressions"]))
                 st.metric("Regressões críticas", len(comparison["critical_regressions"]))
                 st.json(comparison)
@@ -270,6 +280,9 @@ elif page == "Reports & History":
         )
         run = st.selectbox("Execução", runs, format_func=run_label)
         metrics_panel(run["metrics"])
+        st.caption(
+            "Baixe os arquivos para preservá-los. O SQLite da hospedagem gratuita pode ser reiniciado."
+        )
         st.download_button(
             "Export JSON", json.dumps(run, ensure_ascii=False, indent=2),
             file_name=f'{run["id"]}.json', mime="application/json",
