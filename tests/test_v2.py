@@ -131,3 +131,49 @@ def test_partial_suite_cannot_pass_full_ci_gate(tmp_path):
     assert {c["name"] for c in result["checks"] if not c["passed"]} >= {
         "min_cases", "max_missing_cases"
     }
+
+
+def test_real_model_request_has_reproducible_settings(monkeypatch):
+    import json
+    import engine
+
+    captured = {}
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+        def __exit__(self, *_):
+            pass
+        def read(self, *_):
+            return json.dumps({
+                "response": "Acesse Pix, Minhas chaves e Cadastrar chave. [POL-001]",
+                "prompt_eval_count": 80, "eval_count": 22,
+            }).encode()
+
+    def fake_urlopen(req, timeout):
+        captured["payload"] = json.loads(req.data)
+        captured["timeout"] = timeout
+        return FakeResponse()
+
+    monkeypatch.setattr(engine.request, "urlopen", fake_urlopen)
+    policies, dataset = load_data()
+    case = dataset["cases"][0]
+    answer, cites, latency, inp, out = ask(
+        case["question"], policies["policies"], provider="ollama", model="qwen3:4b", case=case
+    )
+    assert cites == ["POL-001"]
+    assert captured["payload"]["think"] is False
+    assert captured["payload"]["options"]["temperature"] == 0
+    assert captured["payload"]["options"]["seed"] == 42
+    assert captured["payload"]["options"]["num_ctx"] == 2048
+    assert (inp, out) == (80, 22)
+
+
+def test_checkpoint_has_one_json_line_per_case(tmp_path):
+    _, dataset = load_data()
+    path = tmp_path / "checkpoint.jsonl"
+    run = execute_suite(cases=dataset["cases"][:4], db=tmp_path / "runs.db", checkpoint_path=path)
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    assert len(rows) == 4
+    assert {r["case_id"] for r in rows} == {c["id"] for c in dataset["cases"][:4]}
+    assert run["metrics"]["n"] == 4
