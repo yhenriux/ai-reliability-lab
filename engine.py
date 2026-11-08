@@ -310,7 +310,7 @@ def execute_suite(cases=None, provider="demo", model="deterministic-baseline-v1"
         rows.append(row)
         if checkpoint:
             with checkpoint.open("a", encoding="utf-8") as stream:
-                stream.write(json.dumps(row, ensure_ascii=False) + "\\n")
+                stream.write(json.dumps(row, ensure_ascii=False) + "\n")
         if checkpoint and (index % 10 == 0 or index == len(selected)):
             print(f"EVAL_PROGRESS {index}/{len(selected)} model={model}", flush=True)
     run = {
