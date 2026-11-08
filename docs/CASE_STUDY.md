@@ -78,7 +78,7 @@ O avaliador registra a resposta integral, critérios e metadados. A [metodologia
 
 No primeiro experimento real, o modelo de 135M parâmetros apresentou repetição de prompt e respostas irrelevantes. O resultado motivou a seleção do Qwen3 4B, modelo multilíngue de aproximadamente 2,5 GB quantizado, compatível com o runner CPU. A [análise da escolha](MODEL_SELECTION.md) documenta alternativas, critérios e restrições.
 
-O benchmark real terminou com status de workflow `success`, mas apresentou 100 reprovações heurísticas. As primeiras respostas inspecionadas expõem raciocínio em inglês e problemas de citação e aderência lexical. A interpretação requer análise das respostas finais e revisão humana independente; o artefato JSON integral está no workflow, ainda pendente de commit em `data/real_full_qwen3_4b_v2.json`.
+O benchmark real terminou com status de workflow `success`, mas apresentou 100 reprovações heurísticas. As primeiras respostas inspecionadas expõem raciocínio em inglês e problemas de citação e aderência lexical. A interpretação requer análise das respostas finais e revisão humana independente; o [artefato JSON integral está versionado](../data/real_full_qwen3_4b_v2.json), e a [planilha de revisão humana de 20 casos](../data/review_20_qwen3_4b_v2.csv) está preparada sem julgamentos humanos preenchidos.
 
 **O modo demo usa o gabarito** e sua aprovação não mede capacidade do modelo. Os resultados reais são reportados somente após conferência dos artefatos. Consulte [RESULTS.md](RESULTS.md) para valores verificados.
 
