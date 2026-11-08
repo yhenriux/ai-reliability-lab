@@ -16,6 +16,16 @@ streamlit run app.py
 
 Open http://localhost:8501. No API key or paid service required.
 
+### Deploy for free on Streamlit Community Cloud
+
+1. Open [share.streamlit.io](https://share.streamlit.io) and sign in with GitHub.
+2. Select **Create app** → **Yup, I have an app** (wording may vary).
+3. Set repository `yhenriux/ai-reliability-lab`, branch `main`, and main file path `app.py`.
+4. Choose a unique app URL and deploy. The `requirements.txt` installs only Streamlit and pandas.
+5. Open the public app and run **Evaluation Studio → Run Full Evaluation** in **demo** mode.
+
+**Hosted demo limitations:** the deterministic provider works without secrets or paid inference. `http://localhost:11434` points to the Streamlit hosting machine, so a model running on your own laptop will **not** be accessible from the hosted app. The current Ollama adapter is designed for local execution; do not expose an unauthenticated Ollama service to the internet. SQLite data may be lost when the free instance restarts; export runs to JSON/CSV.
+
 ### Six interactive modules
 
 1. Dashboard: historical KPIs and runs.

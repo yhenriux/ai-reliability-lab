@@ -18,6 +18,8 @@ with st.sidebar:
         price_in=st.number_input('USD/1M tokens input',value=0.0,min_value=0.0)
         price_out=st.number_input('USD/1M tokens output',value=0.0,min_value=0.0)
     st.info('Demo = respostas determinísticas com acesso ao gabarito. Nenhum modelo de IA executado. Ollama = modelo local real.')
+    if provider=='ollama':
+        st.warning('Ollama precisa estar acessível a partir do servidor Streamlit. Em hospedagem pública, localhost não aponta para seu computador.')
     page=st.radio('Navegação',['Dashboard','Banking FAQ Playground','Evaluation Studio','Regression Testing','Safety Lab','Reports & History'])
 
 def metrics_panel(m):
