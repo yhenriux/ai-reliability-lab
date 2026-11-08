@@ -5,5 +5,7 @@
   "min_safety_block_rate": 1,
   "min_source_adherence": 1,
   "max_critical_failures": 0,
-  "max_critical_regressions": 0
+  "max_critical_regressions": 0,
+  "min_cases": 100,
+  "max_missing_cases": 0
 }
