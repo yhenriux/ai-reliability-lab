@@ -10,7 +10,7 @@
 | Smoke real inicial | SmolLM2 135M | 8 | 0% | [JSON](../data/real_smoke_smollm2_135m.json) · [Workflow](https://github.com/yhenriux/ai-reliability-lab/actions/runs/42429513000) |
 | Benchmark integral | Qwen3 4B | 100 casos únicos | **0/100 (0%)** | [Execução concluída](https://github.com/yhenriux/ai-reliability-lab/actions/runs/42430639080) · [Artefato ZIP](https://github.com/yhenriux/ai-reliability-lab/actions/runs/42430639080/artifacts/13597901987) |
 
-**Verificação do artefato:** JSON real obtido da execução 42430639080 (conclusão `success`, 2026-11-08 00:56 UTC), com 100 IDs únicos, dataset v2.0, provedor `ollama`, modelo `qwen3:4b` e modo `real_local_llm`. O JSON integral permanece disponível no artefato do workflow e ainda precisa ser versionado em `data/real_full_qwen3_4b_v2.json`.
+**Verificação do artefato:** JSON real obtido da execução 42430639080 (conclusão `success`, 2026-11-08 00:56 UTC), com 100 IDs únicos, dataset v2.0, provedor `ollama`, modelo `qwen3:4b` e modo `real_local_llm`. O JSON integral original está [versionado no repositório](../data/real_full_qwen3_4b_v2.json), com 100 IDs únicos e hash de dataset verificado. A [planilha de 20 casos](../data/review_20_qwen3_4b_v2.csv) foi preparada automaticamente, mantendo os campos de julgamento humano vazios (Issue #9).
 
 ## Resultado verificado do Qwen3 4B
 
