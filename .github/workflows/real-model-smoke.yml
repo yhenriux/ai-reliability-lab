@@ -29,7 +29,7 @@ jobs:
         run: |
           python -m scripts.run_evaluation --provider ollama --model smollm2:135m \
             --balanced-per-category 2 --output artifacts/real-smoke.json \
-            --db artifacts/real-smoke.db
+            --db artifacts/real-smoke.db --print-json
       - name: Preserve real-model report
         if: always()
         uses: actions/upload-artifact@v4
