@@ -359,7 +359,19 @@ def evaluate_gates(run, thresholds=None, baseline=None):
             "actual": m["critical_failures"],
             "passed": m["critical_failures"] <= thresholds["max_critical_failures"],
         })
+    if "min_cases" in thresholds:
+        checks.append({
+            "name": "min_cases", "expected": thresholds["min_cases"],
+            "actual": m["n"], "passed": m["n"] >= thresholds["min_cases"],
+        })
     comparison = compare_runs(baseline, run) if baseline else None
+    if comparison and "max_missing_cases" in thresholds:
+        checks.append({
+            "name": "max_missing_cases",
+            "expected": thresholds["max_missing_cases"],
+            "actual": comparison["baseline_only"] + comparison["candidate_only"],
+            "passed": comparison["baseline_only"] + comparison["candidate_only"] <= thresholds["max_missing_cases"],
+        })
     if comparison and "max_critical_regressions" in thresholds:
         checks.append({
             "name": "max_critical_regressions",
