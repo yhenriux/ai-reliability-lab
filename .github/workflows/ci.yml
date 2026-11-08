@@ -15,4 +15,4 @@ jobs:
       - name: Syntax
         run: python -m compileall -q .
       - name: Tests
-        run: pytest -q
+        run: python -m pytest -q
