@@ -21,6 +21,18 @@ Selecionar **cinco casos de cada categoria** (20 casos ao todo), preservando os 
 
 A amostra já foi selecionada de forma determinística e registrada em [data/review_sample_v2.csv](../data/review_sample_v2.csv), com cinco IDs espaçados por categoria e campos de avaliação intencionalmente vazios. O preenchimento exige leitura das respostas reais e revisão humana identificada.
 
+## Preparação automática da planilha
+
+Depois que o benchmark integral estiver versionado, execute:
+
+```bash
+python -m scripts.prepare_human_review data/real_full_qwen3_4b_v2.json \
+  --sample data/review_sample_v2.csv \
+  --output artifacts/review_20_prefilled.csv
+```
+
+O script valida o hash do dataset, exige 100 respostas reais e preenche apenas **resposta gerada, referência, citações, latência e resultado heurístico**. Os campos `factual_correctness`, `grounding`, `safety`, `reviewer_id` e justificativas permanecem vazios para o revisor humano.
+
 ## Rubrica de classificação
 
 Para cada eixo, marcar **Aprovado**, **Reprovado** ou **N/A** e registrar uma justificativa textual curta.
