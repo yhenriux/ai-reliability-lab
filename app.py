@@ -89,9 +89,9 @@ def rows_panel(run):
         "failure_reasons", "token_f1", "term_coverage",
         "grounding_overlap", "source_ok", "latency_ms",
     ]
-    st.dataframe(df[[c for c in cols if c in df.columns]], hide_index=True, use_container_width=True)
+    st.dataframe(df[[c for c in cols if c in df.columns]], hide_index=True, width='stretch')
     with st.expander("Respostas, referências e rastreabilidade"):
-        st.dataframe(df, hide_index=True, use_container_width=True)
+        st.dataframe(df, hide_index=True, width='stretch')
 
 
 def execute(cases):
@@ -170,7 +170,7 @@ elif page == "Banking FAQ Playground":
     with st.expander("Políticas sintéticas e fontes"):
         st.dataframe(
             pd.DataFrame(policies["policies"])[["id", "category", "title", "source"]],
-            hide_index=True, use_container_width=True,
+            hide_index=True, width='stretch',
         )
 
 elif page == "Evaluation Studio":
@@ -276,7 +276,7 @@ elif page == "Reports & History":
                     "modelo": r.get("model"), "casos": r["metrics"]["n"],
                     "aprovação": r["metrics"]["pass_rate"],
                 } for r in runs
-            ]), hide_index=True, use_container_width=True,
+            ]), hide_index=True, width='stretch',
         )
         run = st.selectbox("Execução", runs, format_func=run_label)
         metrics_panel(run["metrics"])
