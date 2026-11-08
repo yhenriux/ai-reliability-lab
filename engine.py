@@ -25,6 +25,8 @@ REFUSAL = "Não encontrei essa informação nas políticas fictícias disponíve
 SAFETY = "Não posso ajudar com esse pedido."
 CLARIFY = "Pode especificar qual serviço bancário você deseja consultar?"
 DATASET_FILES = {"1.0": "golden_v1.json", "2.0": "golden_v2.json"}
+# Fixed parameters make independent model comparisons reproducible.
+MODEL_OPTIONS = {"temperature": 0, "num_predict": 112, "num_ctx": 2048, "seed": 42}
 CITATION_RE = re.compile(r"\[(POL-\d{3})\]")
 STOPWORDS = set(
     "a ao aos as com da das de do dos e em eu o os ou para por que se um uma no na nos nas "
@@ -146,7 +148,8 @@ def ask(question, policies, provider="demo", model="deterministic-baseline-v1",
         )
         payload = json.dumps({
             "model": model, "prompt": prompt, "stream": False,
-            "options": {"temperature": 0, "num_predict": 160},
+            "think": False, "keep_alive": "30m",
+            "options": MODEL_OPTIONS,
         }).encode("utf-8")
         req = request.Request(url.rstrip("/") + "/api/generate", data=payload,
                               headers={"Content-Type": "application/json"})
@@ -291,15 +294,25 @@ def validate_run(run):
 
 def execute_suite(cases=None, provider="demo", model="deterministic-baseline-v1",
                   url="http://127.0.0.1:11434", price_input=0, price_output=0,
-                  db=DB, dataset_version="2.0"):
+                  db=DB, dataset_version="2.0", checkpoint_path=None):
     policies, dataset = load_data(dataset_version)
     selected = dataset["cases"] if cases is None else cases
     rows = []
-    for case in selected:
+    checkpoint = Path(checkpoint_path) if checkpoint_path else None
+    if checkpoint:
+        checkpoint.parent.mkdir(parents=True, exist_ok=True)
+        checkpoint.write_text("", encoding="utf-8")
+    for index, case in enumerate(selected, start=1):
         answer, cites, latency, inp, out = ask(
             case["question"], policies["policies"], provider, model, url, case
         )
-        rows.append(evaluate(case, answer, cites, latency, inp, out, price_input, price_output))
+        row = evaluate(case, answer, cites, latency, inp, out, price_input, price_output)
+        rows.append(row)
+        if checkpoint:
+            with checkpoint.open("a", encoding="utf-8") as stream:
+                stream.write(json.dumps(row, ensure_ascii=False) + "\\n")
+        if checkpoint and (index % 10 == 0 or index == len(selected)):
+            print(f"EVAL_PROGRESS {index}/{len(selected)} model={model}", flush=True)
     run = {
         "schema_version": "2.0", "id": str(uuid.uuid4()),
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -309,6 +322,7 @@ def execute_suite(cases=None, provider="demo", model="deterministic-baseline-v1"
         "evidence_mode": "oracle_policy_for_labeled_cases",
         "citation_provenance": "oracle_attached" if provider == "demo" else "model_generated",
         "metrics_method": "deterministic_and_lexical_heuristics_v2",
+        "model_options": MODEL_OPTIONS if provider == "ollama" else None,
         "metrics": metrics(rows), "cases": rows,
     }
     save_run(run, db)
