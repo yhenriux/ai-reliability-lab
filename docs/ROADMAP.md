@@ -7,7 +7,7 @@
 | P0 | Dataset sintético versionado (100 casos) | ✅ Concluído | `data/golden_v2.json` |
 | P0 | Harness determinístico e CI | ✅ Concluído | Testes pytest e quality gates |
 | P0 | Inferência real inicial (135M, 8 casos) | ✅ Concluído | JSON versionado e GitHub Actions |
-| P0 | Inferência real Qwen3 4B, 100 casos | 🔄 Em execução / a verificar | 100 IDs, JSON completo, métricas, workflow aprovado |
+| P0 | Inferência real Qwen3 4B, 100 casos | ✅ Execução, verificação e versionamento concluídos | [Run 42430639080](https://github.com/yhenriux/ai-reliability-lab/actions/runs/42430639080): 100 IDs únicos, `real_local_llm`, `qwen3:4b`; 0% aprovação heurística. [JSON integral](../data/real_full_qwen3_4b_v2.json) e [planilha de revisão](../data/review_20_qwen3_4b_v2.csv) versionados |
 | P0 | Revisão **humana independente** de 20 respostas | ⏳ Pendente | Rubrica preenchida, justificativas, matriz de concordância |
 | P1 | Testes dos seis módulos e jornadas principais | ✅ Automatizados | Streamlit AppTest e testes do motor |
 | P1 | Inspeção visual multi-dispositivo | ⏳ Pendente | Capturas e verificação de responsividade |
@@ -22,6 +22,10 @@
 **P0:** evidências necessárias para sustentar afirmações sobre desempenho de modelos.  
 **P1:** qualidade operacional, experiência e redução de ambiguidades de interpretação.  
 **P2:** capacidade adicional que depende de uma necessidade validada.
+
+### Resultado do benchmark integral
+
+O Qwen3 4B foi executado em 100 casos reais, com média de 9,98 s por resposta e 0% de aprovação heurística. A próxima investigação deve inspecionar separação de raciocínio e resposta final, formatação de citações e prompts, preservando o artefato original e sem recalibrar métricas retrospectivamente. A Issue #9 continua aberta para revisão humana independente.
 
 ### Próxima decisão após o benchmark integral
 
