@@ -21,7 +21,7 @@ with st.sidebar:
     provider = st.selectbox("Provedor", ["demo", "ollama"] if local_ollama_enabled else ["demo"])
     model = (
         "deterministic-baseline-v1" if provider == "demo"
-        else st.text_input("Modelo Ollama", "smollm2:135m")
+        else st.text_input("Modelo Ollama", "qwen3:4b")
     )
     url = os.environ.get("AI_LAB_OLLAMA_URL", "http://127.0.0.1:11434")
     price_in = price_out = 0.0
@@ -46,7 +46,7 @@ policies, dataset = load_data(dataset_version)
 # Versioned, independently observed model runs are available even if free hosting resets SQLite.
 bundled_runs = [
     validate_run(json.loads(path.read_text(encoding="utf-8")))
-    for path in sorted((ROOT / "data").glob("real_smoke_*.json"))
+    for path in sorted((ROOT / "data").glob("real_*.json"))
 ]
 runs = sorted(
     {r["id"]: r for r in list_runs() + bundled_runs}.values(),
@@ -89,9 +89,9 @@ def rows_panel(run):
         "failure_reasons", "token_f1", "term_coverage",
         "grounding_overlap", "source_ok", "latency_ms",
     ]
-    st.dataframe(df[[c for c in cols if c in df.columns]], hide_index=True, use_container_width=True)
+    st.dataframe(df[[c for c in cols if c in df.columns]], hide_index=True, width='stretch')
     with st.expander("Respostas, referências e rastreabilidade"):
-        st.dataframe(df, hide_index=True, use_container_width=True)
+        st.dataframe(df, hide_index=True, width='stretch')
 
 
 def execute(cases):
@@ -108,7 +108,7 @@ def execute(cases):
 
 
 def run_label(run):
-    return f'{run["created_at"]} | {run.get("mode", "?")} | {run["id"][:8]}'
+    return f'{run["created_at"][:16]} | {run.get("model", "?")} | {run["metrics"]["n"]} casos | {run.get("mode", "?")} | {run["id"][:8]}'
 
 
 if page == "Dashboard":
@@ -119,8 +119,9 @@ if page == "Dashboard":
     )
     current = [r for r in runs if r.get("dataset_version") == dataset_version]
     if current:
-        run = current[0]
-        st.caption(f'Última execução: {run_label(run)} | Modelo: {run.get("model", "?")}')
+        preferred = next((i for i, r in enumerate(current) if r.get("mode") == "real_local_llm"), 0)
+        run = st.selectbox("Execução em destaque", current, index=preferred, format_func=run_label)
+        st.caption(f'Modelo: {run.get("model", "?")} | Amostra: {run["metrics"]["n"]} casos')
         if run.get("mode") == "deterministic_demo":
             st.warning("Indicadores do modo demo são verificações do pipeline, não resultados de LLM.")
         elif run["metrics"]["n"] < 100:
@@ -169,7 +170,7 @@ elif page == "Banking FAQ Playground":
     with st.expander("Políticas sintéticas e fontes"):
         st.dataframe(
             pd.DataFrame(policies["policies"])[["id", "category", "title", "source"]],
-            hide_index=True, use_container_width=True,
+            hide_index=True, width='stretch',
         )
 
 elif page == "Evaluation Studio":
@@ -206,7 +207,16 @@ elif page == "Regression Testing":
         candidate = st.selectbox("Candidata", list(labels), index=0)
         if st.button("Comparar execuções", type="primary"):
             try:
+                if labels[baseline]["id"] == labels[candidate]["id"]:
+                    st.warning("Selecione duas execuções distintas para uma comparação útil.")
                 comparison = compare_runs(labels[baseline], labels[candidate])
+                if comparison["baseline_only"] or comparison["candidate_only"]:
+                    st.warning(
+                        "As execuções têm coberturas diferentes. Os deltas usam apenas "
+                        f'{comparison["common_cases"]} casos em comum; '
+                        f'{comparison["baseline_only"]} exclusivos da baseline e '
+                        f'{comparison["candidate_only"]} exclusivos da candidata.'
+                    )
                 st.metric("Novas regressões", len(comparison["regressions"]))
                 st.metric("Regressões críticas", len(comparison["critical_regressions"]))
                 st.json(comparison)
@@ -266,10 +276,13 @@ elif page == "Reports & History":
                     "modelo": r.get("model"), "casos": r["metrics"]["n"],
                     "aprovação": r["metrics"]["pass_rate"],
                 } for r in runs
-            ]), hide_index=True, use_container_width=True,
+            ]), hide_index=True, width='stretch',
         )
         run = st.selectbox("Execução", runs, format_func=run_label)
         metrics_panel(run["metrics"])
+        st.caption(
+            "Baixe os arquivos para preservá-los. O SQLite da hospedagem gratuita pode ser reiniciado."
+        )
         st.download_button(
             "Export JSON", json.dumps(run, ensure_ascii=False, indent=2),
             file_name=f'{run["id"]}.json', mime="application/json",
