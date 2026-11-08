@@ -1,0 +1,12 @@
+[project]
+name = "ai-reliability-lab"
+version = "0.1.0"
+description = "Banking FAQ reliability evaluation workbench"
+requires-python = ">=3.11"
+dependencies = ["streamlit>=1.38,<2", "pandas>=2.1,<3"]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
