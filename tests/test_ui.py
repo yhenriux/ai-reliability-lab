@@ -68,7 +68,7 @@ def test_safety_suite_journey():
 
 def test_dataset_switch_keeps_evaluation_working():
     at = AppTest.from_file(APP, default_timeout=30).run()
-    at.selectbox[0].set_value("1.0").run()
+    next(s for s in at.selectbox if s.label == "Dataset versionado").set_value("1.0").run()
     at.radio[0].set_value("Evaluation Studio").run()
     assert not at.exception
     next(b for b in at.button if b.label == "Run Full Evaluation").click().run()
