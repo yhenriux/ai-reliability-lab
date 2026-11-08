@@ -1,0 +1,56 @@
+name: Full real LLM evaluation (100 cases)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/full-model-benchmark.yml
+jobs:
+  qwen3-4b-100:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Start CPU-only Ollama
+        run: |
+          docker run -d --name aurora-ollama -p 127.0.0.1:11434:11434 ollama/ollama:latest
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:11434/api/tags >/dev/null; then break; fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:11434/api/tags
+      - name: Pull selected multilingual model
+        run: |
+          docker exec aurora-ollama ollama pull qwen3:4b
+          docker exec aurora-ollama ollama list
+      - name: Evaluate all 100 real responses (4 categories)
+        timeout-minutes: 100
+        run: |
+          python -m scripts.run_evaluation --provider ollama --model qwen3:4b \
+            --dataset-version 2.0 --checkpoint-path artifacts/qwen3-4b-checkpoint.jsonl \
+            --output artifacts/qwen3-4b-100.json --db artifacts/qwen3-4b-100.db \
+            --print-json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('artifacts/qwen3-4b-100.json').read_text())
+          assert r['metrics']['n']==100, 'Full benchmark must contain exactly 100 cases'
+          assert len({c['case_id'] for c in r['cases']})==100, 'Cases must be unique'
+          assert r['mode']=='real_local_llm', 'Demo results are forbidden'
+          print('FULL_BENCHMARK_VERIFIED 100/100',flush=True)
+          PY
+      - name: Upload full report and checkpoint (including partial failures)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qwen3-4b-100-real-inference
+          path: |
+            artifacts/qwen3-4b-100.json
+            artifacts/qwen3-4b-checkpoint.jsonl
+          retention-days: 30
+          if-no-files-found: warn
