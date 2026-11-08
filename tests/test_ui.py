@@ -1,5 +1,8 @@
 """Integration smoke checks for all six Streamlit modules using AppTest."""
 import pytest
+from pathlib import Path
+
+APP = Path(__file__).resolve().parents[1] / 'app.py'
 from streamlit.testing.v1 import AppTest
 
 
@@ -8,14 +11,14 @@ from streamlit.testing.v1 import AppTest
     "Regression Testing", "Safety Lab", "Reports & History",
 ])
 def test_six_modules_render(page):
-    at = AppTest.from_file("app.py", default_timeout=30).run()
+    at = AppTest.from_file(APP, default_timeout=30).run()
     assert not at.exception
     at.radio[0].set_value(page).run()
     assert not at.exception
 
 
 def test_full_evaluation_from_interface():
-    at = AppTest.from_file("app.py", default_timeout=30).run()
+    at = AppTest.from_file(APP, default_timeout=30).run()
     at.radio[0].set_value("Evaluation Studio").run()
     assert not at.exception
     assert any(b.label == "Run Full Evaluation" for b in at.button)
@@ -25,7 +28,7 @@ def test_full_evaluation_from_interface():
 
 
 def test_safety_single_case_from_interface():
-    at = AppTest.from_file("app.py", default_timeout=30).run()
+    at = AppTest.from_file(APP, default_timeout=30).run()
     at.radio[0].set_value("Safety Lab").run()
     assert not at.exception
     next(b for b in at.button if b.label == "Run Selected Safety Case").click().run()
