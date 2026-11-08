@@ -5,6 +5,8 @@ import os
 import pandas as pd
 import streamlit as st
 
+from reports import export_cases_csv
+
 from engine import (
     DB, ROOT, ask, compare_runs, evaluate, evaluate_gates, execute_suite,
     list_runs, load_data, save_run, validate_run,
@@ -288,7 +290,7 @@ elif page == "Reports & History":
             file_name=f'{run["id"]}.json', mime="application/json",
         )
         st.download_button(
-            "Export CSV", pd.DataFrame(run["cases"]).to_csv(index=False),
+            "Export CSV", export_cases_csv(run["cases"]),
             file_name=f'{run["id"]}.csv', mime="text/csv",
         )
         rows_panel(run)
