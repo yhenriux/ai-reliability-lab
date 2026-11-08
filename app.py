@@ -108,7 +108,7 @@ def execute(cases):
 
 
 def run_label(run):
-    return f'{run["created_at"]} | {run.get("mode", "?")} | {run["id"][:8]}'
+    return f'{run["created_at"][:16]} | {run.get("model", "?")} | {run["metrics"]["n"]} casos | {run.get("mode", "?")} | {run["id"][:8]}'
 
 
 if page == "Dashboard":
