@@ -24,7 +24,7 @@ Open http://localhost:8501. No API key or paid service required.
 4. Choose a unique app URL and deploy. The `requirements.txt` installs only Streamlit and pandas.
 5. Open the public app and run **Evaluation Studio → Run Full Evaluation** in **demo** mode.
 
-**Hosted demo limitations:** the deterministic provider works without secrets or paid inference. `http://localhost:11434` points to the Streamlit hosting machine, so a model running on your own laptop will **not** be accessible from the hosted app. The current Ollama adapter is designed for local execution; do not expose an unauthenticated Ollama service to the internet. SQLite data may be lost when the free instance restarts; export runs to JSON/CSV.
+**Hosted demo limitations:** the deterministic provider works without secrets or paid inference. `http://localhost:11434` points to the Streamlit hosting machine, so a model running on your own laptop will **not** be accessible from the hosted app. The current Ollama adapter is designed for local execution and is disabled in the public interface unless the application operator explicitly enables it. Do not expose an unauthenticated Ollama service to the internet. SQLite data may be lost when the free instance restarts; export runs to JSON/CSV.
 
 ### Six interactive modules
 
@@ -37,7 +37,7 @@ Open http://localhost:8501. No API key or paid service required.
 
 ### Optional: evaluate a genuine local LLM
 
-Install Ollama, download a model (e.g. `ollama pull llama3.2:1b`) and choose **ollama** in the sidebar. Supply the local model name and Ollama URL. Calls use the provider's observed input/output token counts. Pricing is user-configured and defaults to zero.
+Install Ollama, download a model (e.g. `ollama pull llama3.2:1b`), and **enable the local provider on your own machine**. On PowerShell, run `$env:AI_LAB_ENABLE_OLLAMA='1'; streamlit run app.py`; on Linux/macOS run `AI_LAB_ENABLE_OLLAMA=1 streamlit run app.py`. The endpoint defaults to `http://127.0.0.1:11434` and can be set by the application operator through `AI_LAB_OLLAMA_URL`. Anonymous visitors cannot configure outbound endpoints. Calls use the provider's observed input/output token counts. Pricing is user-configured and defaults to zero.
 
 ### Engineering notes
 
