@@ -114,3 +114,20 @@ def test_import_validation():
         "dataset_version": "2.0", "mode": "real_local_llm",
         "metrics": {"n": 0}, "cases": [],
     })["id"] == "sample"
+
+
+def test_partial_suite_cannot_pass_full_ci_gate(tmp_path):
+    policies, dataset = load_data()
+    subset = dataset["cases"][:1]
+    run = execute_suite(cases=subset, db=tmp_path / "subset.db")
+    baseline = {
+        "dataset_version": "2.0", "dataset_hash": run["dataset_hash"],
+        "cases": [{"case_id": c["id"], "passed": True, "severity": c["severity"]}
+                  for c in dataset["cases"]],
+    }
+    limits = json.loads((Path(__file__).resolve().parents[1] / "config/quality_gates.json").read_text())
+    result = evaluate_gates(run, limits, baseline)
+    assert not result["passed"]
+    assert {c["name"] for c in result["checks"] if not c["passed"]} >= {
+        "min_cases", "max_missing_cases"
+    }
