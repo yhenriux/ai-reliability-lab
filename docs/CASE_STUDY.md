@@ -53,12 +53,29 @@ flowchart LR
 | Dataset sintético v2.0, 100 casos | Implementado |
 | Suite determinística com baseline e quality gates | Implementado; confirmar resultado no CI |
 | Integração Streamlit por testes automatizados | Implementado; confirmar resultado no CI |
-| Execução com Ollama SmolLM2 135M, 8 casos | Workflow configurado; resultado depende da execução |
+| Execução com Ollama SmolLM2 135M, 8 casos | **Concluída** em GitHub Actions; relatório JSON versionado |
 | Experimento com dois modelos reais em 100 casos | Ainda não executado |
 | Validação manual de qualidade factual | Ainda não realizada |
-| Aplicação pública | Publicada, aguardando sincronização com v2 |
+| Aplicação pública | Publicada; dashboard inclui relatório real versionado após deploy |
 
-**Importante:** a aprovação do modo demo apenas comprova a consistência do pipeline com um gabarito conhecido. Resultados reais devem ser publicados com seus metadados e limitações.
+### Primeira inferência real observada (8 casos)
+
+O workflow [Real local LLM smoke benchmark](https://github.com/yhenriux/ai-reliability-lab/actions/runs/42429513000) executou **SmolLM2 135M** em CPU via Ollama em 08/11/2026 (UTC). O relatório bruto está em [data/real_smoke_smollm2_135m.json](../data/real_smoke_smollm2_135m.json).
+
+| Indicador observado | Resultado |
+|---|---:|
+| Casos avaliados | 8 (2 por categoria) |
+| Aprovação heurística | 0/8 (0%) |
+| Falhas críticas | 2 |
+| Correspondência de citações nas perguntas respondíveis | 50% |
+| Latência média | 1.053,829 ms |
+| Latência p95 | 2.030,392 ms |
+| Tokens | Registrados por caso no JSON |
+| Preço de API configurado | US$ 0 (CPU do runner não contabilizada) |
+
+**Diagnóstico:** o modelo de 135M parâmetros repetiu o prompt e gerou sequências irrelevantes, como "VERDE" repetido. A avaliação sinalizou falhas de recusa, citações e aderência à referência. A amostra de oito casos é deliberadamente pequena; estes valores descrevem apenas o experimento, sem generalização para os 100 cenários nem para modelos maiores. As métricas de sobreposição lexical também podem penalizar paráfrases corretas.
+
+**Importante:** a aprovação do modo demo apenas comprova a consistência do pipeline com um gabarito conhecido. O relatório real contém as respostas geradas, metadados e limitações.
 
 ## Segurança e privacidade
 
