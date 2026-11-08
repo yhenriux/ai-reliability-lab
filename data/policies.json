@@ -1,0 +1,198 @@
+{
+  "bank": "Aurora Bank (fictício)",
+  "version": "1.0",
+  "policies": [
+    {
+      "id": "POL-001",
+      "version": "1.0",
+      "category": "Pix",
+      "title": "Cadastrar chave Pix",
+      "answer": "No aplicativo Aurora, acesse Pix, Minhas chaves e selecione Cadastrar chave. Confirme a autenticação.",
+      "terms": [
+        "chave",
+        "cadastrar"
+      ],
+      "source": "Aurora Bank | Política fictícia 001 v1.0"
+    },
+    {
+      "id": "POL-002",
+      "version": "1.0",
+      "category": "Pix",
+      "title": "Alterar limite Pix",
+      "answer": "No aplicativo Aurora, abra Pix, Limites e solicite a alteração. A aprovação segue a política de segurança.",
+      "terms": [
+        "limite",
+        "Pix"
+      ],
+      "source": "Aurora Bank | Política fictícia 002 v1.0"
+    },
+    {
+      "id": "POL-003",
+      "version": "1.0",
+      "category": "Contas",
+      "title": "Abrir conta",
+      "answer": "Para solicitar uma conta Aurora, acesse Abrir conta no aplicativo, informe seus dados e conclua a verificação de identidade.",
+      "terms": [
+        "conta",
+        "aplicativo"
+      ],
+      "source": "Aurora Bank | Política fictícia 003 v1.0"
+    },
+    {
+      "id": "POL-004",
+      "version": "1.0",
+      "category": "Contas",
+      "title": "Encerrar conta",
+      "answer": "Solicite o encerramento pelo menu Ajuda, Encerrar conta. Pendências devem ser regularizadas antes da conclusão.",
+      "terms": [
+        "encerramento",
+        "pendências"
+      ],
+      "source": "Aurora Bank | Política fictícia 004 v1.0"
+    },
+    {
+      "id": "POL-005",
+      "version": "1.0",
+      "category": "Cartões",
+      "title": "Bloquear cartão",
+      "answer": "Em Cartões, escolha o cartão e use Bloquear temporariamente. Em caso de perda, selecione Comunicar perda ou roubo.",
+      "terms": [
+        "cartão",
+        "bloquear"
+      ],
+      "source": "Aurora Bank | Política fictícia 005 v1.0"
+    },
+    {
+      "id": "POL-006",
+      "version": "1.0",
+      "category": "Cartões",
+      "title": "Segunda via",
+      "answer": "Em Cartões, selecione Solicitar segunda via. O aplicativo informa eventual tarifa antes da confirmação.",
+      "terms": [
+        "segunda via",
+        "tarifa"
+      ],
+      "source": "Aurora Bank | Política fictícia 006 v1.0"
+    },
+    {
+      "id": "POL-007",
+      "version": "1.0",
+      "category": "Segurança",
+      "title": "Suspeita de fraude",
+      "answer": "Em caso de suspeita de fraude, bloqueie o acesso pelo aplicativo e contate imediatamente o suporte oficial do Aurora.",
+      "terms": [
+        "fraude",
+        "suporte"
+      ],
+      "source": "Aurora Bank | Política fictícia 007 v1.0"
+    },
+    {
+      "id": "POL-008",
+      "version": "1.0",
+      "category": "Segurança",
+      "title": "Alterar senha",
+      "answer": "Em Segurança, selecione Alterar senha, confirme sua identidade e defina nova senha seguindo as orientações exibidas.",
+      "terms": [
+        "senha",
+        "segurança"
+      ],
+      "source": "Aurora Bank | Política fictícia 008 v1.0"
+    },
+    {
+      "id": "POL-009",
+      "version": "1.0",
+      "category": "Crédito",
+      "title": "Consultar empréstimo",
+      "answer": "As condições de empréstimo são personalizadas e podem ser consultadas em Crédito no aplicativo Aurora, quando disponíveis.",
+      "terms": [
+        "crédito",
+        "condições"
+      ],
+      "source": "Aurora Bank | Política fictícia 009 v1.0"
+    },
+    {
+      "id": "POL-010",
+      "version": "1.0",
+      "category": "Crédito",
+      "title": "Antecipar parcelas",
+      "answer": "Em Crédito, selecione o contrato e a opção Antecipar parcelas. Confira o demonstrativo antes da confirmação.",
+      "terms": [
+        "parcelas",
+        "contrato"
+      ],
+      "source": "Aurora Bank | Política fictícia 010 v1.0"
+    },
+    {
+      "id": "POL-011",
+      "version": "1.0",
+      "category": "Tarifas",
+      "title": "Consultar tarifas",
+      "answer": "A tabela vigente de tarifas fictícias do Aurora está disponível em Ajuda, Tarifas e serviços.",
+      "terms": [
+        "tarifas",
+        "tabela"
+      ],
+      "source": "Aurora Bank | Política fictícia 011 v1.0"
+    },
+    {
+      "id": "POL-012",
+      "version": "1.0",
+      "category": "Tarifas",
+      "title": "Taxa de segunda via",
+      "answer": "Eventuais tarifas para emissão de segunda via são informadas na solicitação, antes da confirmação.",
+      "terms": [
+        "tarifa",
+        "segunda via"
+      ],
+      "source": "Aurora Bank | Política fictícia 012 v1.0"
+    },
+    {
+      "id": "POL-013",
+      "version": "1.0",
+      "category": "Atendimento",
+      "title": "Abrir reclamação",
+      "answer": "No aplicativo Aurora, acesse Ajuda, Atendimento e selecione Registrar reclamação. Guarde o número de protocolo.",
+      "terms": [
+        "reclamação",
+        "protocolo"
+      ],
+      "source": "Aurora Bank | Política fictícia 013 v1.0"
+    },
+    {
+      "id": "POL-014",
+      "version": "1.0",
+      "category": "Atendimento",
+      "title": "Acompanhar protocolo",
+      "answer": "Para acompanhar um protocolo, acesse Ajuda, Meus atendimentos no aplicativo Aurora.",
+      "terms": [
+        "protocolo",
+        "atendimentos"
+      ],
+      "source": "Aurora Bank | Política fictícia 014 v1.0"
+    },
+    {
+      "id": "POL-015",
+      "version": "1.0",
+      "category": "Investimentos",
+      "title": "Consultar investimentos",
+      "answer": "Em Investimentos, consulte os produtos disponíveis e leia os riscos, custos e documentos antes de investir.",
+      "terms": [
+        "investimentos",
+        "riscos"
+      ],
+      "source": "Aurora Bank | Política fictícia 015 v1.0"
+    },
+    {
+      "id": "POL-016",
+      "version": "1.0",
+      "category": "Investimentos",
+      "title": "Resgatar investimento",
+      "answer": "Acesse Investimentos, selecione o produto e verifique regras de liquidez e eventual prazo antes de solicitar resgate.",
+      "terms": [
+        "resgate",
+        "liquidez"
+      ],
+      "source": "Aurora Bank | Política fictícia 016 v1.0"
+    }
+  ]
+}
