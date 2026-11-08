@@ -38,6 +38,7 @@ flowchart LR
 - O modo Ollama recebe um endpoint definido pelo operador; o visitante da hospedagem pública não configura URLs arbitrárias.
 - Perguntas livres não recebem score com referência inexistente.
 - A interface permite baixar JSON e CSV, inclusive resultados reais versionados.
+- A exportação CSV neutraliza campos que começam como fórmulas de planilha, reduzindo risco de *CSV injection* quando relatórios são abertos em Excel ou ferramentas similares.
 - A comparação de regressões exige versão e hash de dataset compatíveis; diferenças na cobertura devem ser exibidas ao avaliador.
 - A importação de JSON fica desativada na hospedagem pública por padrão.
 
