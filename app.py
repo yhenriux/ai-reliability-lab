@@ -1,133 +1,277 @@
-"""Streamlit interface for the AI Reliability Lab."""
+"""Six-module Streamlit interface for the Aurora Bank evaluation laboratory."""
 import json
 import os
+
 import pandas as pd
 import streamlit as st
-from engine import load_data,ask,evaluate,execute_suite,list_runs,compare_runs
 
-st.set_page_config(page_title='AI Reliability Lab',page_icon='🧪',layout='wide')
-policies,dataset=load_data()
-st.title('AI Reliability Lab')
-st.caption('Banking FAQ Reliability Engineering | Aurora Bank é um banco inteiramente fictício')
+from engine import (
+    DB, ROOT, ask, compare_runs, evaluate, evaluate_gates, execute_suite,
+    list_runs, load_data, save_run, validate_run,
+)
+
+st.set_page_config(page_title="AI Reliability Lab", page_icon="🧪", layout="wide")
+st.title("AI Reliability Lab")
+st.caption("Banking FAQ Reliability Engineering | Aurora Bank é uma instituição inteiramente fictícia")
+
 with st.sidebar:
-    st.header('Configuração')
-    local_ollama_enabled=os.environ.get('AI_LAB_ENABLE_OLLAMA')=='1'
-    provider=st.selectbox('Provider',['demo','ollama'] if local_ollama_enabled else ['demo'])
-    model='deterministic-baseline-v1' if provider=='demo' else st.text_input('Modelo local Ollama','llama3.2:1b')
-    # The Ollama endpoint is configured by the operator, never by an anonymous visitor.
-    url=os.environ.get('AI_LAB_OLLAMA_URL','http://127.0.0.1:11434')
-    price_in=price_out=0.0
-    if provider=='ollama':
-        price_in=st.number_input('USD/1M tokens input',value=0.0,min_value=0.0)
-        price_out=st.number_input('USD/1M tokens output',value=0.0,min_value=0.0)
-    st.info('Demo = respostas determinísticas com acesso ao gabarito. Nenhum modelo de IA executado. Ollama = modelo local real.')
-    if provider=='ollama':
-        st.warning('Ollama precisa estar acessível a partir do servidor Streamlit. Em hospedagem pública, localhost não aponta para seu computador.')
-    else:
-        st.caption('Para avaliar um LLM local, execute o projeto no seu computador com AI_LAB_ENABLE_OLLAMA=1.')
-    page=st.radio('Navegação',['Dashboard','Banking FAQ Playground','Evaluation Studio','Regression Testing','Safety Lab','Reports & History'])
+    st.header("Configuração")
+    dataset_version = st.selectbox("Dataset versionado", ["2.0", "1.0"])
+    local_ollama_enabled = os.environ.get("AI_LAB_ENABLE_OLLAMA") == "1"
+    provider = st.selectbox("Provedor", ["demo", "ollama"] if local_ollama_enabled else ["demo"])
+    model = (
+        "deterministic-baseline-v1" if provider == "demo"
+        else st.text_input("Modelo Ollama", "smollm2:135m")
+    )
+    url = os.environ.get("AI_LAB_OLLAMA_URL", "http://127.0.0.1:11434")
+    price_in = price_out = 0.0
+    if provider == "ollama":
+        price_in = st.number_input("USD/1M tokens input", min_value=0.0, value=0.0)
+        price_out = st.number_input("USD/1M tokens output", min_value=0.0, value=0.0)
+    st.info(
+        "Demo: usa o gabarito para testar o pipeline. "
+        "Aprovação de 100% não significa qualidade de um LLM."
+        if provider == "demo" else
+        "Ollama: inferência real. Evidências dos casos rotulados são fornecidas pelo gabarito."
+    )
+    if not local_ollama_enabled:
+        st.caption("Ollama local: execute com AI_LAB_ENABLE_OLLAMA=1.")
+    page = st.radio(
+        "Navegação",
+        ["Dashboard", "Banking FAQ Playground", "Evaluation Studio",
+         "Regression Testing", "Safety Lab", "Reports & History"],
+    )
+
+policies, dataset = load_data(dataset_version)
+runs = list_runs()
+
+
+def percentage(value):
+    return "N/D" if value is None else f"{value * 100:.1f}%"
+
 
 def metrics_panel(m):
-    a,b,c,d=st.columns(4)
-    a.metric('Casos',m['n'])
-    b.metric('Aprovação',f"{m['pass_rate']*100:.1f}%" if m['pass_rate'] is not None else 'N/D')
-    c.metric('Bloqueio adversarial',f"{m['safety_block_rate']*100:.1f}%" if m['safety_block_rate'] is not None else 'N/D')
-    d.metric('Latência p95 observada',f"{m['latency_p95_ms']:.3f} ms" if m['latency_p95_ms'] is not None else 'N/D')
-    st.caption(f"Custo estimado USD {m['estimated_cost_usd']:.6f} | Falhas {m['failures']}")
+    a, b, c, d = st.columns(4)
+    a.metric("Casos", m["n"])
+    b.metric("Aprovação", percentage(m["pass_rate"]))
+    c.metric("Bloqueio adversarial", percentage(m["safety_block_rate"]))
+    d.metric(
+        "Latência p95 observada",
+        "N/D" if m["latency_p95_ms"] is None else f'{m["latency_p95_ms"]:.1f} ms',
+    )
+    a, b, c, d = st.columns(4)
+    a.metric("Qualidade heurística", percentage(m.get("quality_pass_rate")))
+    b.metric("Correspondência de citações", percentage(m.get("source_adherence")))
+    c.metric("Sobreposição com evidência", percentage(m.get("grounding_overlap_mean")))
+    d.metric("Falhas críticas", m.get("critical_failures", 0))
+    st.caption(
+        f'Falhas: {m["failures"]} | Padrões sensíveis: {m.get("risk_flags", 0)} | '
+        f'Custo de API estimado: US$ {m["estimated_cost_usd"]:.6f} '
+        "(preço configurado manualmente; custo de infraestrutura excluído)"
+    )
+
 
 def rows_panel(run):
-    df=pd.DataFrame(run['cases'])
-    st.dataframe(df[['case_id','category','question','passed','token_f1','source_ok','latency_ms']],use_container_width=True,hide_index=True)
-    with st.expander('Detalhes de todas as respostas'):st.dataframe(df,use_container_width=True,hide_index=True)
+    df = pd.DataFrame(run["cases"])
+    if df.empty:
+        st.info("Execução sem casos.")
+        return
+    cols = [
+        "case_id", "category", "scenario", "question", "passed",
+        "failure_reasons", "token_f1", "term_coverage",
+        "grounding_overlap", "source_ok", "latency_ms",
+    ]
+    st.dataframe(df[[c for c in cols if c in df.columns]], hide_index=True, use_container_width=True)
+    with st.expander("Respostas, referências e rastreabilidade"):
+        st.dataframe(df, hide_index=True, use_container_width=True)
+
 
 def execute(cases):
     try:
-        with st.spinner('Executando testes...'):
-            return execute_suite(cases,provider,model,url,price_in,price_out)
+        with st.spinner("Executando a avaliação..."):
+            return execute_suite(
+                cases=cases, provider=provider, model=model, url=url,
+                price_input=price_in, price_output=price_out,
+                dataset_version=dataset_version,
+            )
     except Exception as exc:
-        st.error(f'Falha da execução: {exc}')
+        st.error(f"Falha na execução: {exc}")
         return None
 
-runs=list_runs()
-if page=='Dashboard':
-    st.subheader('Indicadores de confiabilidade')
-    st.write(f"Dataset {dataset['dataset_id']} v{dataset['version']} | {len(dataset['cases'])} cenários")
-    if runs:
-        st.caption(f"Execução mais recente: {runs[0]['created_at']} | {runs[0]['mode']}")
-        metrics_panel(runs[0]['metrics'])
-        history=pd.DataFrame([{'data':r['created_at'],'aprovação':r['metrics']['pass_rate']} for r in reversed(runs)])
-        st.line_chart(history.set_index('data'))
-        rows_panel(runs[0])
-    else:st.info('Execute a primeira suíte em Evaluation Studio.')
 
-elif page=='Banking FAQ Playground':
-    st.subheader('Perguntas bancárias')
-    options={f"{c['id']} | {c['question']}":c for c in dataset['cases']}
-    selection=st.selectbox('Caso de referência',['Pergunta livre']+list(options))
-    case=options.get(selection)
-    question=st.text_input('Pergunta',value=case['question'] if case else 'Como faço para bloquear cartão?')
-    if case is not None and question != case['question']:
-        st.info('A pergunta foi alterada. Ela será avaliada como pergunta livre, sem utilizar o gabarito do caso selecionado.')
-        case=None
-    if st.button('Gerar resposta',type='primary'):
+def run_label(run):
+    return f'{run["created_at"]} | {run.get("mode", "?")} | {run["id"][:8]}'
+
+
+if page == "Dashboard":
+    st.subheader("Visão geral de confiabilidade")
+    st.write(
+        f'Dataset **{dataset["dataset_id"]} v{dataset["version"]}** '
+        f'| {len(dataset["cases"])} cenários | {len(policies["policies"])} políticas fictícias'
+    )
+    current = [r for r in runs if r.get("dataset_version") == dataset_version]
+    if current:
+        run = current[0]
+        st.caption(f'Última execução: {run_label(run)} | Modelo: {run.get("model", "?")}')
+        if run.get("mode") == "deterministic_demo":
+            st.warning("Indicadores do modo demo são verificações do pipeline, não resultados de LLM.")
+        metrics_panel(run["metrics"])
+        history = pd.DataFrame([
+            {"data": r["created_at"], "aprovação": r["metrics"]["pass_rate"]}
+            for r in reversed(current) if r["metrics"]["pass_rate"] is not None
+        ])
+        if not history.empty:
+            st.line_chart(history.set_index("data"))
+        rows_panel(run)
+    else:
+        st.info("Execute uma suíte em Evaluation Studio para gerar indicadores.")
+
+elif page == "Banking FAQ Playground":
+    st.subheader("Perguntas bancárias")
+    options = {f'{c["id"]} | {c["question"]}': c for c in dataset["cases"]}
+    selection = st.selectbox("Caso de referência", ["Pergunta livre"] + list(options))
+    case = options.get(selection)
+    question = st.text_input(
+        "Pergunta", value=case["question"] if case else "Como faço para bloquear cartão?"
+    )
+    if case and question != case["question"]:
+        st.info("Pergunta alterada: avaliação livre, sem acesso ao gabarito do caso selecionado.")
+        case = None
+    if st.button("Gerar resposta", type="primary"):
         try:
-            answer,citations,elapsed,in_tok,out_tok=ask(question,policies['policies'],provider,model,url,case)
-            st.write('### Resposta');st.write(answer)
-            st.caption(f"Fontes: {', '.join(citations) if citations else 'nenhuma'} | Latência {elapsed:.3f} ms | tokens input {in_tok}, output {out_tok}")
+            answer, citations, elapsed, inp, out = ask(
+                question, policies["policies"], provider, model, url, case
+            )
+            st.markdown("#### Resposta")
+            st.write(answer)
+            st.caption(
+                f'Fontes geradas/selecionadas: {", ".join(citations) if citations else "nenhuma"} '
+                f'| Latência observada {elapsed:.2f} ms | Tokens: {inp} entrada, {out} saída'
+            )
             if case:
-                st.json(evaluate(case,answer,citations,elapsed,in_tok,out_tok,price_in,price_out))
-            else:st.warning('Perguntas livres não têm referência validada: não recebem score de qualidade.')
-        except Exception as exc:st.error(str(exc))
-    with st.expander('Base de conhecimento fictícia'):
-        st.dataframe(pd.DataFrame(policies['policies'])[['id','category','title','source']],hide_index=True,use_container_width=True)
+                st.json(evaluate(case, answer, citations, elapsed, inp, out, price_in, price_out))
+            else:
+                st.warning("Perguntas livres não têm referência validada e não recebem score.")
+        except Exception as exc:
+            st.error(str(exc))
+    with st.expander("Políticas sintéticas e fontes"):
+        st.dataframe(
+            pd.DataFrame(policies["policies"])[["id", "category", "title", "source"]],
+            hide_index=True, use_container_width=True,
+        )
 
-elif page=='Evaluation Studio':
-    st.subheader('Evaluation Studio')
-    categories=st.multiselect('Categorias',['answerable','unanswerable','adversarial','ambiguous'],default=['answerable','unanswerable','adversarial','ambiguous'])
-    selected=[c for c in dataset['cases'] if c['category'] in categories]
-    st.caption(f'{len(selected)} casos selecionados.')
-    if st.button('Run Full Evaluation' if len(selected)==100 else 'Run Selected Evaluation',disabled=not selected,type='primary'):
-        run=execute(selected)
-        if run:st.session_state['latest']=run
-    if st.session_state.get('latest'):
-        run=st.session_state['latest']
-        st.caption(f"{run['created_at']} | {run['mode']}")
-        metrics_panel(run['metrics']);rows_panel(run)
+elif page == "Evaluation Studio":
+    st.subheader("Evaluation Studio")
+    categories = st.multiselect(
+        "Categorias", ["answerable", "unanswerable", "adversarial", "ambiguous"],
+        default=["answerable", "unanswerable", "adversarial", "ambiguous"],
+    )
+    selected = [c for c in dataset["cases"] if c["category"] in categories]
+    st.caption(f"{len(selected)} casos selecionados. Cada execução registra versão, hashes e modo.")
+    if st.button(
+        "Run Full Evaluation" if len(selected) == 100 else "Run Selected Evaluation",
+        type="primary", disabled=not selected,
+    ):
+        run = execute(selected)
+        if run:
+            st.session_state["latest"] = run
+    if st.session_state.get("latest"):
+        run = st.session_state["latest"]
+        st.caption(run_label(run))
+        if run.get("mode") == "deterministic_demo":
+            st.warning("Demo: respostas obtidas do gabarito. Interprete os scores como testes do motor.")
+        metrics_panel(run["metrics"])
+        rows_panel(run)
 
-elif page=='Regression Testing':
-    st.subheader('Comparação entre versões e regressões')
-    if len(runs)<2:st.info('Execute duas suítes para comparar resultados.')
+elif page == "Regression Testing":
+    st.subheader("Regressões e quality gates")
+    current = [r for r in runs if r.get("dataset_version") == dataset_version]
+    if len(current) < 2:
+        st.info("Execute pelo menos duas suítes com o mesmo dataset para comparar resultados.")
     else:
-        labels={f"{r['created_at']} · {r['id'][:8]}":r for r in runs}
-        old=st.selectbox('Execução baseline',list(labels),index=1)
-        new=st.selectbox('Execução candidata',list(labels),index=0)
-        if st.button('Comparar'):st.json(compare_runs(labels[old],labels[new]))
+        labels = {run_label(r): r for r in current}
+        baseline = st.selectbox("Baseline", list(labels), index=1)
+        candidate = st.selectbox("Candidata", list(labels), index=0)
+        if st.button("Comparar execuções", type="primary"):
+            try:
+                comparison = compare_runs(labels[baseline], labels[candidate])
+                st.metric("Novas regressões", len(comparison["regressions"]))
+                st.metric("Regressões críticas", len(comparison["critical_regressions"]))
+                st.json(comparison)
+                if labels[candidate].get("mode") == "deterministic_demo":
+                    thresholds = json.loads(
+                        (ROOT / "config/quality_gates.json").read_text(encoding="utf-8")
+                    )
+                    st.markdown("#### Quality gates do pipeline demonstrativo")
+                    st.json(evaluate_gates(labels[candidate], thresholds, labels[baseline]))
+                else:
+                    st.caption("Gates de qualidade para modelos reais exigem calibração por modelo.")
+            except ValueError as exc:
+                st.error(str(exc))
 
-elif page=='Safety Lab':
-    st.subheader('Ataques e recusas')
-    cases=[c for c in dataset['cases'] if c['category'] in ('adversarial','unanswerable')]
-    st.caption(f'{len(cases)} casos: prompt injection e falta de evidência.')
-    selected=st.selectbox('Exemplo',cases,format_func=lambda c:f"{c['id']}: {c['question']}")
-    st.write('Resposta esperada:',selected['expected_answer'])
-    left,right=st.columns(2)
-    if left.button('Run Selected Safety Case'):
-        run=execute([selected])
-        if run:st.session_state['safety']=run
-    if right.button('Run Safety Suite',type='primary'):
-        run=execute(cases)
-        if run:st.session_state['safety']=run
-    if st.session_state.get('safety'):
-        metrics_panel(st.session_state['safety']['metrics']);rows_panel(st.session_state['safety'])
+elif page == "Safety Lab":
+    st.subheader("Ataques, recusas e falta de evidência")
+    cases = [c for c in dataset["cases"] if c["category"] in ("adversarial", "unanswerable")]
+    st.caption(f"{len(cases)} casos sintéticos de segurança e escopo.")
+    selected = st.selectbox("Cenário", cases, format_func=lambda c: f'{c["id"]}: {c["question"]}')
+    st.write("Critério de referência:", selected["expected_answer"])
+    left, right = st.columns(2)
+    if left.button("Run Selected Safety Case"):
+        run = execute([selected])
+        if run:
+            st.session_state["safety"] = run
+    if right.button("Run Safety Suite", type="primary"):
+        run = execute(cases)
+        if run:
+            st.session_state["safety"] = run
+    if st.session_state.get("safety"):
+        metrics_panel(st.session_state["safety"]["metrics"])
+        rows_panel(st.session_state["safety"])
 
-elif page=='Reports & History':
-    st.subheader('Execuções registradas')
-    if not runs:st.info('Nenhuma execução registrada.')
+elif page == "Reports & History":
+    st.subheader("Histórico, exportação e importação")
+    if os.environ.get("AI_LAB_ENABLE_IMPORT") == "1":
+        uploaded = st.file_uploader("Importar relatório JSON exportado", type=["json"])
+        if uploaded is not None and st.button("Importar relatório"):
+            try:
+                if uploaded.size > 3_000_000:
+                    raise ValueError("Arquivo excede 3 MB")
+                imported = validate_run(json.loads(uploaded.getvalue().decode("utf-8")))
+                save_run(imported)
+                st.success("Relatório importado. Recarregue a página para vê-lo no histórico.")
+            except (ValueError, UnicodeError, json.JSONDecodeError) as exc:
+                st.error(f"Arquivo inválido: {exc}")
     else:
-        st.dataframe(pd.DataFrame([{'id':r['id'],'date':r['created_at'],'mode':r['mode'],'cases':r['metrics']['n'],'pass_rate':r['metrics']['pass_rate']} for r in runs]),use_container_width=True,hide_index=True)
-        run=st.selectbox('Execução',runs,format_func=lambda r:f"{r['created_at']} · {r['id'][:8]}")
-        metrics_panel(run['metrics'])
-        st.download_button('Export JSON',json.dumps(run,ensure_ascii=False,indent=2),file_name=f"{run['id']}.json",mime='application/json')
-        st.download_button('Export CSV',pd.DataFrame(run['cases']).to_csv(index=False),file_name=f"{run['id']}.csv",mime='text/csv')
+        st.caption("Importação desabilitada na hospedagem pública. Para habilitar localmente: AI_LAB_ENABLE_IMPORT=1.")
+    if not runs:
+        st.info("Nenhuma execução registrada.")
+    else:
+        st.dataframe(
+            pd.DataFrame([
+                {
+                    "id": r["id"], "data": r["created_at"],
+                    "modo": r.get("mode"), "dataset": r["dataset_version"],
+                    "modelo": r.get("model"), "casos": r["metrics"]["n"],
+                    "aprovação": r["metrics"]["pass_rate"],
+                } for r in runs
+            ]), hide_index=True, use_container_width=True,
+        )
+        run = st.selectbox("Execução", runs, format_func=run_label)
+        metrics_panel(run["metrics"])
+        st.download_button(
+            "Export JSON", json.dumps(run, ensure_ascii=False, indent=2),
+            file_name=f'{run["id"]}.json', mime="application/json",
+        )
+        st.download_button(
+            "Export CSV", pd.DataFrame(run["cases"]).to_csv(index=False),
+            file_name=f'{run["id"]}.csv', mime="text/csv",
+        )
+        rows_panel(run)
 
 st.divider()
-st.caption('Aviso: dados e políticas fictícios. O modo demo verifica a execução do pipeline, sem medir qualidade de LLM. Scores de correção e segurança são heurísticos. Histórico SQLite pode ser efêmero em hospedagem gratuita.')
+st.caption(
+    "Avaliação heurística e reproduzível, com limites conhecidos. "
+    "Dataset e banco fictícios. No modo demo, a resposta conhece o gabarito. "
+    "Histórico SQLite na hospedagem gratuita pode ser perdido após reinicialização. "
+    "Exporte os relatórios para preservá-los."
+)

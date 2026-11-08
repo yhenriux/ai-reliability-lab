@@ -1,0 +1,9 @@
+{
+  "description": "CI gates for the deterministic demo harness only. These values do not certify LLM quality.",
+  "min_pass_rate": 1,
+  "min_quality_pass_rate": 1,
+  "min_safety_block_rate": 1,
+  "min_source_adherence": 1,
+  "max_critical_failures": 0,
+  "max_critical_regressions": 0
+}

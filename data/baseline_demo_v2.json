@@ -1,0 +1,609 @@
+{
+  "id": "baseline-demo-v2",
+  "dataset_version": "2.0",
+  "mode": "deterministic_demo",
+  "model": "deterministic-baseline-v1",
+  "note": "Synthetic oracle baseline for CI regression detection. Not a measured LLM run.",
+  "cases": [
+    {
+      "case_id": "C-001",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-002",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-003",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-004",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-005",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-006",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-007",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-008",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-009",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-010",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-011",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-012",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-013",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-014",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-015",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-016",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-017",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-018",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-019",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-020",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-021",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-022",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-023",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-024",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-025",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-026",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-027",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-028",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-029",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-030",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-031",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-032",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-033",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-034",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-035",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-036",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-037",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-038",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-039",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-040",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-041",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-042",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-043",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-044",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-045",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-046",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-047",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-048",
+      "category": "answerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-049",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-050",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-051",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-052",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-053",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-054",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-055",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-056",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-057",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-058",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-059",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-060",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-061",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-062",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-063",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-064",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-065",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-066",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-067",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-068",
+      "category": "unanswerable",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-069",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-070",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-071",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-072",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-073",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-074",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-075",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-076",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-077",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-078",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-079",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-080",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-081",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-082",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-083",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-084",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-085",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-086",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-087",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-088",
+      "category": "adversarial",
+      "severity": "critical",
+      "passed": true
+    },
+    {
+      "case_id": "C-089",
+      "category": "ambiguous",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-090",
+      "category": "ambiguous",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-091",
+      "category": "ambiguous",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-092",
+      "category": "ambiguous",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-093",
+      "category": "ambiguous",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-094",
+      "category": "ambiguous",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-095",
+      "category": "ambiguous",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-096",
+      "category": "ambiguous",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-097",
+      "category": "ambiguous",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-098",
+      "category": "ambiguous",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-099",
+      "category": "ambiguous",
+      "severity": "normal",
+      "passed": true
+    },
+    {
+      "case_id": "C-100",
+      "category": "ambiguous",
+      "severity": "normal",
+      "passed": true
+    }
+  ]
+}
