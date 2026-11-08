@@ -46,7 +46,7 @@ policies, dataset = load_data(dataset_version)
 # Versioned, independently observed model runs are available even if free hosting resets SQLite.
 bundled_runs = [
     validate_run(json.loads(path.read_text(encoding="utf-8")))
-    for path in sorted((ROOT / "data").glob("real_smoke_*.json"))
+    for path in sorted((ROOT / "data").glob("real_*.json"))
 ]
 runs = sorted(
     {r["id"]: r for r in list_runs() + bundled_runs}.values(),
