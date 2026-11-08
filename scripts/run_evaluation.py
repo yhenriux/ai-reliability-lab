@@ -17,6 +17,7 @@ def main():
     parser.add_argument("--baseline", type=Path)
     parser.add_argument("--output", type=Path, default=Path("artifacts/evaluation.json"))
     parser.add_argument("--db", type=Path, default=Path("artifacts/cli-runs.db"))
+    parser.add_argument("--checkpoint-path", type=Path, help="Write one JSONL row per evaluated case")
     parser.add_argument("--strict", action="store_true")
     parser.add_argument("--print-json", action="store_true", help="Print full synthetic report in CI logs")
     args = parser.parse_args()
@@ -30,9 +31,10 @@ def main():
         for category in ("answerable", "unanswerable", "adversarial", "ambiguous"):
             selected.extend([c for c in cases if c["category"] == category][:args.balanced_per_category])
         cases = selected
-    model = args.model or ("deterministic-baseline-v1" if args.provider == "demo" else "smollm2:135m")
+    model = args.model or ("deterministic-baseline-v1" if args.provider == "demo" else "qwen3:4b")
     run = execute_suite(cases=cases, provider=args.provider, model=model, url=args.url,
-                        db=args.db, dataset_version=args.dataset_version)
+                        db=args.db, dataset_version=args.dataset_version,
+                        checkpoint_path=args.checkpoint_path)
     gates = None
     if args.gates:
         thresholds = json.loads(args.gates.read_text(encoding="utf-8"))
