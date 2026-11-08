@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 270" role="img" aria-labelledby="title desc">
+  <title id="title">Pipeline do AI Reliability Lab</title>
+  <desc id="desc">Três etapas: cenários e políticas sintéticas, execução de modelo e avaliação, resultados auditáveis e relatórios.</desc>
+  <rect width="1040" height="270" rx="22" fill="#f7f9fc"/>
+  <g font-family="Arial,Helvetica,sans-serif">
+    <rect x="32" y="42" width="280" height="186" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <circle cx="82" cy="92" r="24" fill="#dbeafe"/>
+    <path d="M69 83h27M69 92h27M69 101h19" stroke="#1d4ed8" stroke-width="3" stroke-linecap="round"/>
+    <text x="65" y="146" font-size="19" font-weight="700" fill="#0f172a">01. Dados de referência</text>
+    <text x="65" y="175" font-size="15" fill="#475569">100 casos e 16 políticas</text>
+    <text x="65" y="197" font-size="15" fill="#475569">Banco fictício Aurora</text>
+    <path d="M321 132h42" stroke="#64748b" stroke-width="3" stroke-linecap="round"/>
+    <path d="M355 125l9 7-9 7" stroke="#64748b" stroke-width="3" fill="none" stroke-linejoin="round"/>
+    <rect x="375" y="42" width="280" height="186" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <circle cx="425" cy="92" r="24" fill="#ede9fe"/>
+    <path d="M416 80h18l9 12-9 12h-18l-9-12z" fill="none" stroke="#6d28d9" stroke-width="3"/>
+    <circle cx="425" cy="92" r="4" fill="#6d28d9"/>
+    <text x="408" y="146" font-size="19" font-weight="700" fill="#0f172a">02. Inferência e avaliação</text>
+    <text x="408" y="175" font-size="15" fill="#475569">Ollama + Qwen3 4B</text>
+    <text x="408" y="197" font-size="15" fill="#475569">Heurísticas e regressões</text>
+    <path d="M664 132h42" stroke="#64748b" stroke-width="3" stroke-linecap="round"/>
+    <path d="M698 125l9 7-9 7" stroke="#64748b" stroke-width="3" fill="none" stroke-linejoin="round"/>
+    <rect x="718" y="42" width="290" height="186" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <circle cx="768" cy="92" r="24" fill="#dcfce7"/>
+    <path d="M757 95l8 8 16-20" stroke="#15803d" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="751" y="146" font-size="19" font-weight="700" fill="#0f172a">03. Evidências auditáveis</text>
+    <text x="751" y="175" font-size="15" fill="#475569">JSON, CSV e checkpoints</text>
+    <text x="751" y="197" font-size="15" fill="#475569">Dashboard e GitHub Actions</text>
+  </g>
+</svg>
