@@ -63,7 +63,7 @@ flowchart LR
     C --> E["🧠 Ollama + Qwen3 4B"]
     D --> F["📏 Avaliador"]
     E --> F
-    F --> G["📊 Dashboard"]
+    F --> G["📊 Ver resultados"]
     F --> H["📦 JSON / CSV"]
     F --> I["🔍 Regressões"]
 ```
@@ -78,12 +78,12 @@ O modo **demo** conhece o gabarito e costuma atingir 100%. Ele comprova a consis
 
 | Módulo | O que permite fazer |
 |---|---|
-| **Dashboard** | Inspecionar aprovação, segurança, citações, latência e execuções |
-| **Banking FAQ Playground** | Formular perguntas livres ou usar casos rotulados |
-| **Evaluation Studio** | Executar a suíte completa ou subconjuntos por categoria |
-| **Regression Testing** | Comparar duas execuções e identificar casos que pioraram |
-| **Safety Lab** | Investigar ataques, pedidos indevidos e recusas |
-| **Reports & History** | Consultar histórico e exportar JSON/CSV |
+| **Ver resultados** | Inspecionar aprovação, segurança, citações, latência e execuções |
+| **Testar uma pergunta** | Formular perguntas livres ou usar casos rotulados |
+| **Executar avaliação** | Executar a suíte completa ou subconjuntos por categoria |
+| **Comparar execuções** | Comparar duas execuções e identificar casos que pioraram |
+| **Testar segurança** | Investigar ataques, pedidos indevidos e recusas |
+| **Consultar histórico e exportar** | Consultar histórico e exportar JSON/CSV |
 
 ## ⚙️ Tecnologias e responsabilidades
 
