@@ -8,12 +8,12 @@
 
 | Jornada | Entrada | Backend esperado | Evidência de teste | Situação |
 |---|---|---|---|---|
-| Dashboard | Seleção de dataset | `load_data`, `list_runs`, métricas | AppTest: renderização sem exceção | Automatizado |
+| Ver resultados | Seleção de dataset | `load_data`, `list_runs`, métricas | AppTest: renderização sem exceção | Automatizado |
 | Playground | Pergunta livre ou caso rotulado | `ask` + `evaluate` | AppTest + motor; pergunta livre sem score | Automatizado |
-| Evaluation Studio | Categorias e execução | `execute_suite` e SQLite | AppTest executa 100 casos demo | Automatizado |
-| Regression Testing | Duas execuções compatíveis | `compare_runs` e `evaluate_gates` | Teste de motor e teste de jornada de comparação | Automatizado |
-| Safety Lab | Caso único ou suíte | `execute_suite` com subconjunto | AppTest executa caso único | Automatizado |
-| Reports & History | Histórico e download | `list_runs`, serialização JSON/CSV | Teste de renderização e integridade dos relatórios | Automatizado |
+| Executar avaliação | Categorias e execução | `execute_suite` e SQLite | AppTest executa 100 casos demo | Automatizado |
+| Comparar execuções | Duas execuções compatíveis | `compare_runs` e `evaluate_gates` | Teste de motor e teste de jornada de comparação | Automatizado |
+| Testar segurança | Caso único ou suíte | `execute_suite` com subconjunto | AppTest executa caso único | Automatizado |
+| Consultar histórico e exportar | Histórico e download | `list_runs`, serialização JSON/CSV | Teste de renderização e integridade dos relatórios | Automatizado |
 | Deploy público | URL Streamlit Cloud | `app.py` e `requirements.txt` | Publicação observada pelo usuário | Confirmado pelo responsável |
 
 **Limite:** o AppTest verifica componentes e transições em ambiente de teste. A compatibilidade real com diferentes navegadores, tamanhos de tela e downloads locais ainda pode exigir inspeção manual.
