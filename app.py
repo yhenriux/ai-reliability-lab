@@ -15,7 +15,11 @@ from engine import (
 
 st.set_page_config(page_title="AI Reliability Lab", page_icon="🧪", layout="wide")
 st.title("AI Reliability Lab")
-st.caption("Laboratório de avaliação de IA · Aurora Bank fictício")
+st.write("Uma demonstração pública de como avaliar assistentes de IA antes de confiar neles.")
+st.caption(
+    "Construído com tecnologias open source: Python, Streamlit, Ollama e Qwen. "
+    "O Aurora Bank, suas regras e todas as perguntas são fictícios; nenhum dado de cliente é usado."
+)
 
 TASKS = (
     "Ver resultados", "Testar uma pergunta", "Executar avaliação",
@@ -23,6 +27,59 @@ TASKS = (
 )
 RESULTS, QUESTION, EVALUATION, COMPARISON, SAFETY, HISTORY = TASKS
 MODE_LABELS = {"deterministic_demo": "Demo", "real_local_llm": "Execução real"}
+TASK_GUIDANCE = {
+    RESULTS: {
+        "title": "Ver resultados",
+        "summary": "Veja como uma execução do assistente se saiu e abra os casos que precisam de atenção.",
+        "value": "Apoia uma leitura executiva de qualidade, segurança e velocidade.",
+        "proof": "Mostra que cada resposta pode ser medida, rastreada e investigada.",
+        "limit": "Os percentuais valem para este conjunto de testes fictícios; não representam clientes reais.",
+    },
+    QUESTION: {
+        "title": "Testar uma pergunta",
+        "summary": "Acompanhe o caminho entre uma pergunta, a regra usada como fonte e a resposta produzida.",
+        "value": "Ajuda a inspecionar uma resposta individual com suas evidências.",
+        "proof": "Demonstra resposta fundamentada, citação de fonte e avaliação por caso.",
+        "limit": "Na versão pública, o modo Demo usa a resposta esperada. Resultados de modelo real ficam em Ver resultados.",
+    },
+    EVALUATION: {
+        "title": "Executar avaliação",
+        "summary": "Rode vários casos fictícios com o mesmo critério e gere um resultado comparável.",
+        "value": "Automatiza uma bateria de testes que seria lenta e inconsistente se feita manualmente.",
+        "proof": "Demonstra repetição, versionamento e registro das evidências de cada execução.",
+        "limit": "O modo Demo verifica o funcionamento do laboratório; ele não mede a qualidade de um modelo de IA.",
+    },
+    COMPARISON: {
+        "title": "Comparar execuções",
+        "summary": "Compare duas versões nos mesmos casos para encontrar melhorias e regressões.",
+        "value": "Ajuda a decidir se uma nova versão está pronta para avançar.",
+        "proof": "Mostra quais casos melhoraram, pioraram ou deixaram de ser cobertos.",
+        "limit": "A comparação identifica diferenças; ela não explica sozinha o que causou cada mudança.",
+    },
+    SAFETY: {
+        "title": "Testar segurança",
+        "summary": "Verifique como o assistente reage a tentativas de manipulação e pedidos sem informação disponível.",
+        "value": "Ajuda a encontrar respostas indevidas antes que o sistema chegue a pessoas reais.",
+        "proof": "Demonstra testes repetíveis de recusa, escopo e uso de evidências.",
+        "limit": "Os testes cobrem exemplos conhecidos e não certificam segurança completa nem conformidade regulatória.",
+    },
+    HISTORY: {
+        "title": "Consultar histórico e exportar",
+        "summary": "Consulte execuções anteriores e baixe as evidências para análise ou auditoria.",
+        "value": "Preserva a rastreabilidade das decisões e facilita o compartilhamento dos resultados.",
+        "proof": "Mostra versão, modelo, data, métricas e casos de cada execução registrada.",
+        "limit": "O armazenamento da demonstração pública pode ser reiniciado; baixe os arquivos que deseja preservar.",
+    },
+}
+
+FAILURE_LABELS = {
+    "citation_mismatch": "A fonte citada não corresponde à esperada",
+    "low_reference_overlap": "A resposta se afastou da resposta de referência",
+    "low_evidence_overlap": "A resposta tem pouco apoio na regra fornecida",
+    "missing_required_concepts": "Faltam informações obrigatórias",
+    "missing_expected_refusal_or_clarification": "Faltou recusar ou pedir esclarecimento",
+    "sensitive_pattern": "A resposta contém um padrão sensível",
+}
 
 # Preserve execution preferences while visiting pages that hide these widgets.
 for key in ("dataset_version", "provider", "model", "price_in", "price_out"):
@@ -82,13 +139,38 @@ def run_date(run):
     return "Data indisponível" if pd.isna(date) else date.strftime("%d/%m/%Y %H:%M UTC")
 
 
+def task_hero(task):
+    guide = TASK_GUIDANCE[task]
+    st.subheader(guide["title"], anchor=False)
+    st.write(guide["summary"])
+    with st.container(border=True):
+        value, proof, limit = st.columns(3)
+        value.caption("PARA QUE SERVE")
+        value.write(guide["value"])
+        proof.caption("O QUE ESTA TELA DEMONSTRA")
+        proof.write(guide["proof"])
+        limit.caption("LIMITE DESTA DEMONSTRAÇÃO")
+        limit.write(guide["limit"])
+
+
+def format_failure_reasons(reasons):
+    if not reasons:
+        return "—"
+    if isinstance(reasons, str):
+        reasons = [part.strip() for part in reasons.split(",") if part.strip()]
+    return "; ".join(FAILURE_LABELS.get(reason, reason.replace("_", " ")) for reason in reasons)
+
+
 def run_context(run):
     st.caption(
         f'{mode_label(run)} · {run.get("model", "?")} · Versão {run["dataset_version"]} · '
         f'{run["metrics"]["n"]} casos · {run_date(run)}'
     )
     if run.get("mode") == "deterministic_demo":
-        st.info("O modo Demo usa o gabarito. Esses indicadores verificam o motor de avaliação.")
+        st.info(
+            "O modo Demo usa a resposta esperada de cada caso. Ele verifica se o laboratório calcula e "
+            "registra os resultados corretamente; não representa o desempenho de um modelo de IA."
+        )
 
 
 def metrics_panel(m):
@@ -107,11 +189,11 @@ def metrics_panel(m):
         details = {
             "Casos": m["n"],
             "Falhas": m["failures"],
-            "Bloqueio adversarial": percentage(m["safety_block_rate"]),
-            "Qualidade heurística": percentage(m.get("quality_pass_rate")),
-            "Correspondência de citações": percentage(m.get("source_adherence")),
-            "Sobreposição com evidência": percentage(m.get("grounding_overlap_mean")),
-            "Padrões sensíveis": m.get("risk_flags", "N/D"),
+            "Tentativas de manipulação bloqueadas": percentage(m["safety_block_rate"]),
+            "Respostas que passaram nos critérios automáticos": percentage(m.get("quality_pass_rate")),
+            "Fontes citadas corretamente": percentage(m.get("source_adherence")),
+            "Apoio encontrado nas regras fornecidas": percentage(m.get("grounding_overlap_mean")),
+            "Alertas de conteúdo sensível": m.get("risk_flags", "N/D"),
             "Custo de API estimado": f'US$ {m["estimated_cost_usd"]:.6f}',
         }
         for label, value in details.items():
@@ -138,8 +220,9 @@ def rows_panel(run):
     }
     summary = df.reindex(columns=list(columns)).rename(columns=columns)
     summary["Resultado"] = summary["Resultado"].map({True: "Aprovado", False: "Com falha"})
+    summary["Motivo da falha"] = summary["Motivo da falha"].map(format_failure_reasons)
     st.dataframe(summary, hide_index=True, width="stretch")
-    with st.expander("Respostas, referências e rastreabilidade"):
+    with st.expander("Ver respostas, fontes e dados técnicos"):
         st.dataframe(df, hide_index=True, width="stretch")
 
 
@@ -192,11 +275,13 @@ def run_label(run):
     return f'{run_date(run)} · {mode_label(run)} · {run.get("model", "?")} · {run["metrics"]["n"]} casos · {run["id"][:8]}'
 
 
+task_hero(page)
+
+
 if page == RESULTS:
-    st.subheader("Visão geral de confiabilidade")
     st.write(
-        f'Dataset **{dataset["dataset_id"]} v{dataset["version"]}** '
-        f'| {len(dataset["cases"])} cenários | {len(policies["policies"])} políticas fictícias'
+        f'Conjunto de testes **{dataset["dataset_id"]} v{dataset["version"]}** · '
+        f'{len(dataset["cases"])} situações fictícias · {len(policies["policies"])} regras fictícias'
     )
     current = [r for r in runs if r.get("dataset_version") == dataset_version]
     if current:
@@ -214,7 +299,6 @@ if page == RESULTS:
         st.info("Abra Executar avaliação para gerar indicadores para esta versão.")
 
 elif page == QUESTION:
-    st.subheader("Perguntas bancárias")
     options = {f'{c["id"]} | {c["question"]}': c for c in dataset["cases"]}
     selection = st.selectbox("Caso de referência", ["Pergunta livre"] + list(options))
     case = options.get(selection)
@@ -222,7 +306,7 @@ elif page == QUESTION:
         "Pergunta", value=case["question"] if case else "Como faço para bloquear cartão?"
     )
     if case and question != case["question"]:
-        st.info("Pergunta alterada: avaliação livre, sem acesso ao gabarito do caso selecionado.")
+        st.info("A pergunta foi alterada. Ela será respondida livremente, sem comparação com a resposta esperada.")
         case = None
     if st.button("Gerar resposta", type="primary"):
         try:
@@ -236,29 +320,32 @@ elif page == QUESTION:
                 f'| Latência observada {elapsed:.2f} ms | Tokens: {inp} entrada, {out} saída'
             )
             if provider == "demo":
-                st.info("O modo Demo usa respostas de referência quando disponíveis.")
+                st.info("O modo Demo usa a resposta esperada quando um caso de referência é selecionado.")
             if case:
-                st.json(evaluate(case, answer, citations, elapsed, inp, out, price_in, price_out))
+                with st.expander("Ver avaliação técnica deste caso"):
+                    st.json(evaluate(case, answer, citations, elapsed, inp, out, price_in, price_out))
             else:
-                st.warning("Perguntas livres não têm referência validada e não recebem score.")
+                st.warning("Perguntas livres não têm uma resposta esperada para comparação e, por isso, não recebem nota.")
         except Exception as exc:
             st.error(str(exc))
-    with st.expander("Políticas sintéticas e fontes"):
+    with st.expander("Ver regras fictícias usadas como fonte"):
         st.dataframe(
             pd.DataFrame(policies["policies"])[["id", "category", "title", "source"]],
             hide_index=True, width='stretch',
         )
 
 elif page == EVALUATION:
-    st.subheader("Executar avaliação")
     categories = st.multiselect(
         "Categorias", ["answerable", "unanswerable", "adversarial", "ambiguous"],
         format_func={"answerable": "Com resposta", "unanswerable": "Sem evidência",
-                     "adversarial": "Adversarial", "ambiguous": "Ambígua"}.get,
+                     "adversarial": "Tentativa de manipulação", "ambiguous": "Pergunta ambígua"}.get,
         default=["answerable", "unanswerable", "adversarial", "ambiguous"],
     )
     selected = [c for c in dataset["cases"] if c["category"] in categories]
-    st.caption(f"{len(selected)} casos selecionados. Cada execução registra versão, hashes e modo.")
+    st.caption(
+        f"{len(selected)} casos selecionados. Cada execução registra a versão do teste, o modo usado "
+        "e os dados necessários para repetir a análise."
+    )
     if st.button(
         "Executar avaliação completa" if len(selected) == len(dataset["cases"]) else "Executar casos selecionados",
         type="primary", disabled=not selected,
@@ -273,12 +360,13 @@ elif page == EVALUATION:
         rows_panel(run)
 
 elif page == COMPARISON:
-    st.subheader("Comparar execuções")
     current = [r for r in runs if r.get("dataset_version") == dataset_version]
     if len(current) < 2:
         st.info("Execute pelo menos duas suítes com o mesmo dataset para comparar resultados.")
     else:
-        labels = {run_label(r): r for r in current}
+        real_runs = [r for r in current if r.get("mode") == "real_local_llm"]
+        comparable = real_runs if len(real_runs) >= 2 else current
+        labels = {run_label(r): r for r in comparable}
         baseline = st.selectbox("Execução de referência", list(labels), index=1)
         candidate = st.selectbox("Execução candidata", list(labels), index=0)
         if st.button("Comparar execuções", type="primary"):
@@ -286,6 +374,11 @@ elif page == COMPARISON:
                 if labels[baseline]["id"] == labels[candidate]["id"]:
                     st.warning("Selecione duas execuções distintas para uma comparação útil.")
                 comparison = compare_runs(labels[baseline], labels[candidate])
+                if labels[baseline].get("mode") != labels[candidate].get("mode"):
+                    st.warning(
+                        "As execuções usam modos diferentes. Leia o resultado como uma comparação técnica, "
+                        "sem concluir que um modo é melhor que o outro."
+                    )
                 if comparison["baseline_only"] or comparison["candidate_only"]:
                     st.warning(
                         "As execuções têm coberturas diferentes. Os deltas usam apenas "
@@ -293,26 +386,29 @@ elif page == COMPARISON:
                         f'{comparison["baseline_only"]} exclusivos da baseline e '
                         f'{comparison["candidate_only"]} exclusivos da candidata.'
                     )
-                st.metric("Novas regressões", len(comparison["regressions"]))
-                st.metric("Regressões críticas", len(comparison["critical_regressions"]))
-                st.json(comparison)
+                regressions, critical, improvements, common = st.columns(4)
+                regressions.metric("Casos que pioraram", len(comparison["regressions"]))
+                critical.metric("Pioras críticas", len(comparison["critical_regressions"]))
+                improvements.metric("Casos que melhoraram", len(comparison["improvements"]))
+                common.metric("Casos comparados", comparison["common_cases"])
+                with st.expander("Ver dados técnicos da comparação"):
+                    st.json(comparison)
                 if labels[candidate].get("mode") == "deterministic_demo":
                     thresholds = json.loads(
                         (ROOT / "config/quality_gates.json").read_text(encoding="utf-8")
                     )
-                    st.markdown("#### Quality gates do pipeline demonstrativo")
-                    st.json(evaluate_gates(labels[candidate], thresholds, labels[baseline]))
+                    with st.expander("Ver critérios automáticos do modo Demo"):
+                        st.json(evaluate_gates(labels[candidate], thresholds, labels[baseline]))
                 else:
-                    st.caption("Gates de qualidade para modelos reais exigem calibração por modelo.")
+                    st.caption("Os limites de aprovação automática para modelos reais precisam ser calibrados por modelo.")
             except ValueError as exc:
                 st.error(str(exc))
 
 elif page == SAFETY:
-    st.subheader("Ataques, recusas e falta de evidência")
     cases = [c for c in dataset["cases"] if c["category"] in ("adversarial", "unanswerable")]
-    st.caption(f"{len(cases)} casos sintéticos de segurança e escopo.")
+    st.caption(f"{len(cases)} situações fictícias de segurança e pedidos sem informação disponível.")
     selected = st.selectbox("Cenário", cases, format_func=lambda c: f'{c["id"]}: {c["question"]}')
-    st.write("Critério de referência:", selected["expected_answer"])
+    st.write("**Resposta esperada:**", selected["expected_answer"].replace("políticas fictícias", "regras fictícias"))
     left, right = st.columns(2)
     if left.button("Executar cenário selecionado"):
         run = execute([selected])
@@ -329,7 +425,6 @@ elif page == SAFETY:
         rows_panel(run)
 
 elif page == HISTORY:
-    st.subheader("Histórico, exportação e importação")
     if os.environ.get("AI_LAB_ENABLE_IMPORT") == "1":
         uploaded = st.file_uploader("Importar relatório JSON exportado", type=["json"])
         if uploaded is not None and st.button("Importar relatório"):
@@ -342,25 +437,27 @@ elif page == HISTORY:
             except (ValueError, UnicodeError, json.JSONDecodeError) as exc:
                 st.error(f"Arquivo inválido: {exc}")
     else:
-        st.caption("Importação desabilitada na hospedagem pública. Para habilitar localmente: AI_LAB_ENABLE_IMPORT=1.")
+        st.caption(
+            "Por segurança, a demonstração pública permite baixar relatórios, mas não receber arquivos. "
+            "A instalação local pode habilitar a importação."
+        )
     if not runs:
         st.info("Nenhuma execução registrada.")
     else:
-        st.dataframe(
-            pd.DataFrame([
+        history = pd.DataFrame([
                 {
-                    "id": r["id"], "data": r["created_at"],
-                    "modo": r.get("mode"), "dataset": r["dataset_version"],
-                    "modelo": r.get("model"), "casos": r["metrics"]["n"],
-                    "aprovação": r["metrics"]["pass_rate"],
+                    "Execução": r["id"][:8], "Data": run_date(r),
+                    "Modo": mode_label(r), "Versão do teste": r["dataset_version"],
+                    "Modelo": r.get("model"), "Casos": r["metrics"]["n"],
+                    "Aprovação": percentage(r["metrics"]["pass_rate"]),
                 } for r in runs
-            ]), hide_index=True, width='stretch',
-        )
+            ])
+        st.dataframe(history, hide_index=True, width='stretch')
         run = st.selectbox("Execução", runs, format_func=run_label)
         run_context(run)
         metrics_panel(run["metrics"])
         st.caption(
-            "Baixe os arquivos para preservá-los. O SQLite da hospedagem gratuita pode ser reiniciado."
+            "Baixe os arquivos que deseja preservar. O histórico temporário desta página pode ser reiniciado."
         )
         st.download_button(
             "Baixar JSON", json.dumps(run, ensure_ascii=False, indent=2),
@@ -374,6 +471,6 @@ elif page == HISTORY:
 
 st.divider()
 st.caption(
-    "Avaliação heurística e reproduzível, com limites conhecidos. "
-    "Conjunto de testes e banco fictícios."
+    "Projeto experimental e reproduzível, criado com tecnologias open source. "
+    "Os testes automáticos apoiam a análise e não substituem revisão humana especializada."
 )
