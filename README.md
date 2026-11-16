@@ -4,13 +4,13 @@
 [![Tests and quality gates](https://github.com/yhenriux/ai-reliability-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/yhenriux/ai-reliability-lab/actions/workflows/ci.yml)
 [![Streamlit](https://img.shields.io/badge/interface-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://ai-reliability-lab.streamlit.app/)
 [![Python](https://img.shields.io/badge/backend-Python-3776AB?logo=python&logoColor=white)](engine.py)
-[![License](https://img.shields.io/badge/dados-100%25%20sint%C3%A9ticos-64748b)](data/golden_v2.json)
+[![License](https://img.shields.io/badge/dados-100%25%20fict%C3%ADcios-64748b)](data/golden_v2.json)
 
 **Aplicação pública:** https://ai-reliability-lab.streamlit.app/  
 **Case técnico:** [docs/CASE_STUDY.md](docs/CASE_STUDY.md)  
 **Público-alvo:** profissionais de engenharia de IA, arquitetura de soluções, avaliação de modelos e qualidade de software.
 
-> **Em uma frase:** uma bancada de testes que submete modelos de linguagem a 100 situações bancárias sintéticas, mede a qualidade das respostas, registra falhas e permite comparar versões com evidências auditáveis.
+> **Em uma frase:** uma bancada de testes que apresenta 100 situações bancárias fictícias a modelos de linguagem, mede as respostas, registra falhas e permite comparar versões com evidências auditáveis.
 
 ![Ilustração do fluxo de dados, inferência e evidências](docs/assets/pipeline.svg)
 
@@ -25,13 +25,13 @@ O laboratório oferece um ambiente controlado para investigar:
 - **Segurança:** o modelo recusa solicitações de credenciais e tentativas de contorno?
 - **Confiabilidade operacional:** qual é a latência, o custo estimado e a regressão entre execuções?
 
-O **Aurora Bank é inteiramente fictício**. Não existem integrações com instituições financeiras ou dados de clientes.
+O **Aurora Bank é inteiramente fictício**. As perguntas e regras foram criadas para que o laboratório possa ser demonstrado, repetido e criticado sem usar informações de clientes ou de instituições financeiras reais.
 
 ## 📌 Visão executiva
 
 | Indicador do projeto | Valor |
 |---|---|
-| Cenários sintéticos | **100**, em 4 categorias |
+| Situações fictícias de teste | **100**, em 4 categorias |
 | Políticas bancárias fictícias | **16** |
 | Módulos interativos | **6** |
 | Testes e quality gates | **GitHub Actions + pytest + Streamlit AppTest** |
@@ -50,6 +50,7 @@ O **Aurora Bank é inteiramente fictício**. Não existem integrações com inst
 | Por que o Qwen3 4B foi escolhido | [🧠 Seleção do modelo](docs/MODEL_SELECTION.md) |
 | O que os experimentos realmente demonstraram | [📊 Resultados](docs/RESULTS.md) |
 | Como os seis módulos foram testados | [🖥️ QA de interface e backend](docs/UX_QA.md) |
+| Como a experiência foi auditada para avaliadores | [🔎 Auditoria de UX](docs/UX_AUDIT.md) |
 | Como validar 20 respostas qualitativamente | [👤 Revisão humana, pendente](docs/HUMAN_REVIEW.md) |
 | Melhorias e prioridades | [🗺️ Roadmap](docs/ROADMAP.md) |
 
@@ -72,7 +73,7 @@ flowchart LR
 
 ### ⚠️ Interpretação correta dos resultados
 
-O modo **demo** conhece o gabarito e costuma atingir 100%. Ele comprova a consistência do *harness* (motor de testes). O modo **Ollama** produz respostas reais e pode falhar. Os indicadores são heurísticos; uma revisão humana independente de 20 respostas está explicitamente [pendente](docs/HUMAN_REVIEW.md).
+O modo **Demo** usa a resposta esperada e costuma atingir 100%. Ele comprova que o motor de testes calcula e registra os resultados corretamente. O modo **Ollama** produz respostas com um modelo real e pode falhar. Os indicadores usam critérios automáticos; uma revisão humana independente de 20 respostas está explicitamente [pendente](docs/HUMAN_REVIEW.md).
 
 ## 🖥️ Os seis módulos
 
@@ -151,7 +152,7 @@ python -m scripts.run_evaluation --provider demo --dataset-version 2.0 \
 
 ## 🔐 Segurança, custos e limitações
 
-A aplicação usa apenas políticas e perguntas sintéticas. A inferência Ollama e a importação de relatórios ficam desativadas na hospedagem pública por padrão. O banco SQLite na nuvem pode ser reinicializado; **baixe JSON/CSV para preservar execuções**. Relatórios reais versionados no repositório permanecem consultáveis.
+A aplicação usa apenas regras e perguntas fictícias. A inferência Ollama e a importação de relatórios ficam desativadas na hospedagem pública por padrão. O histórico temporário da página pode ser reiniciado; **baixe JSON/CSV para preservar execuções**. Relatórios reais versionados no repositório permanecem consultáveis.
 
 Os testes de recusa, groundedness e citações são aproximações técnicas. O laboratório **não certifica conformidade regulatória, precisão factual humana ou resistência completa a prompt injection**.
 

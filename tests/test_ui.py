@@ -15,6 +15,11 @@ def test_six_modules_render(page):
     assert not at.exception
     at.sidebar.radio(key="task").set_value(page).run()
     assert not at.exception
+    assert any(heading.value == page for heading in at.subheader)
+    visible_text = " ".join(caption.value for caption in at.caption)
+    assert "PARA QUE SERVE" in visible_text
+    assert "O QUE ESTA TELA DEMONSTRA" in visible_text
+    assert "LIMITE DESTA DEMONSTRAÇÃO" in visible_text
 
 
 def test_full_evaluation_from_interface():
@@ -43,7 +48,7 @@ def test_playground_generates_answer_without_browser_exception():
     next(b for b in at.button if b.label == "Gerar resposta").click().run()
     assert not at.exception
     assert any("Resposta" in m.value for m in at.markdown)
-    assert any("não recebem score" in warning.value for warning in at.warning)
+    assert any("não recebem nota" in warning.value for warning in at.warning)
     reference = at.selectbox[0]
     reference.set_value(reference.options[1]).run()
     next(b for b in at.button if b.label == "Gerar resposta").click().run()
@@ -61,7 +66,7 @@ def test_regression_journey_from_two_ui_executions():
     assert not at.exception
     next(b for b in at.button if b.label == "Comparar execuções").click().run()
     assert not at.exception
-    assert any("Novas regressões" in metric.label for metric in at.metric)
+    assert any("Casos que pioraram" in metric.label for metric in at.metric)
 
 
 def test_safety_suite_journey():
@@ -100,11 +105,14 @@ def test_dashboard_distinguishes_real_run_and_filters_failures():
     at = AppTest.from_file(APP, default_timeout=30).run()
     assert not at.exception
     assert any("Execução real" in caption.value for caption in at.caption)
-    assert not any("gabarito" in info.value for info in at.info)
+    assert not any("resposta esperada" in info.value for info in at.info)
     assert [metric.label for metric in at.metric] == ["Aprovação", "Falhas críticas", "Latência p95"]
     at.radio[0].set_value("Com falha").run()
     assert not at.exception
     assert set(at.dataframe[0].value["Resultado"]) == {"Com falha"}
+    reasons = " ".join(at.dataframe[0].value["Motivo da falha"])
+    assert "citation_mismatch" not in reasons
+    assert "fonte citada" in reasons.lower()
 
 
 def test_execution_settings_survive_history_and_filtered_evaluation():
@@ -141,5 +149,25 @@ def test_history_import_and_export(tmp_path, monkeypatch):
     assert at.success
     assert engine.list_runs()[0]["id"] == run["id"]
     at.run()
-    assert run["id"] in set(at.dataframe[0].value["id"])
+    assert run["id"][:8] in set(at.dataframe[0].value["Execução"])
     assert {button.proto.label for button in at.get("download_button")} == {"Baixar JSON", "Baixar CSV"}
+
+
+def test_public_copy_explains_fictional_data_and_open_source_stack():
+    at = AppTest.from_file(APP, default_timeout=30).run()
+    assert not at.exception
+    copy = " ".join(markdown.value for markdown in at.markdown)
+    captions = " ".join(caption.value for caption in at.caption)
+    assert "assistentes de IA antes de confiar neles" in copy
+    assert "tecnologias open source" in captions
+    assert "nenhum dado de cliente" in captions
+
+
+def test_comparison_prefers_two_real_model_runs():
+    at = AppTest.from_file(APP, default_timeout=30).run()
+    at.sidebar.radio(key="task").set_value("Comparar execuções").run()
+    assert not at.exception
+    selectors = [box for box in at.selectbox if box.label.startswith("Execução")]
+    assert len(selectors) == 2
+    assert "Execução real" in selectors[0].value
+    assert "Execução real" in selectors[1].value
